@@ -749,6 +749,21 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             if (std::isnan(a) || std::isnan(b)) state.fpscr |= (1U << 3U);
             break;
         }
+        // Unary X-form operations use the full 10-bit XO, not the
+        // five-bit A-form arithmetic XO field.
+        if (d.xo == 40U || d.xo == 72U ||
+            d.xo == 136U || d.xo == 264U) {
+            double unary = a;
+            if (d.xo == 40U) unary = -a;                 // fneg
+            else if (d.xo == 72U) unary = a;             // fmr
+            else if (d.xo == 136U) unary = -std::fabs(a); // fnabs
+            else unary = std::fabs(a);                  // fabs
+            state.fpr[d.rt] = std::bit_cast<std::uint64_t>(unary);
+            if ((instruction & 1U) != 0)
+                state.set_condition_field(1,
+                    static_cast<std::uint8_t>((state.fpscr >> 28U) & 0xFU));
+            break;
+        }
         double value = 0.0;
         switch (fp_xo) {
         case 12: value = static_cast<double>(static_cast<float>(a)); break; // frsp
@@ -770,10 +785,6 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             value = a >= 0.0 ? b : std::bit_cast<double>(state.fpr[frc]);
             break;
         }
-        case 40: value = -a; break; // fneg
-        case 72: value = a; break; // fmr
-        case 264: value = std::fabs(a); break; // fabs
-        case 136: value = -std::fabs(a); break; // fnabs
         default: return StepResult::UnsupportedInstruction;
         }
         // Sticky FPSCR summary and primary exception classes.
