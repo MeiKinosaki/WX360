@@ -905,8 +905,8 @@ int main() {
           "VMX compare record sets CR6 when no element matches");
     s.vr[2].lane = {1U, 6U, 3U, 8U};
     check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
-          s.condition_field(6) == 0x4U,
-          "VMX compare record sets CR6 for mixed element results");
+          s.condition_field(6) == 0x0U,
+          "VMX compare record clears CR6 result bits for mixed element results");
     s.vr[1].lane = {std::bit_cast<std::uint32_t>(1.0F),
                     std::bit_cast<std::uint32_t>(2.0F),
                     std::bit_cast<std::uint32_t>(-1.0F),
