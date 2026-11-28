@@ -68,6 +68,34 @@ public:
         return events_.contains(id);
     }
 
+    [[nodiscard]] std::optional<bool> event_signaled(std::uint32_t id) const noexcept {
+        const auto it = events_.find(id);
+        if (it == events_.end()) return std::nullopt;
+        return it->second.signaled;
+    }
+
+    [[nodiscard]] std::optional<std::size_t> event_waiter_count(
+        std::uint32_t id) const noexcept {
+        const auto it = events_.find(id);
+        if (it == events_.end()) return std::nullopt;
+        return it->second.waiters.size();
+    }
+
+    [[nodiscard]] std::optional<std::size_t> semaphore_waiter_count(
+        std::uint32_t id) const noexcept {
+        const auto it = semaphores_.find(id);
+        if (it == semaphores_.end()) return std::nullopt;
+        return it->second.waiters.size();
+    }
+
+    [[nodiscard]] bool close_event(std::uint32_t id) noexcept {
+        return events_.erase(id) == 1U;
+    }
+
+    [[nodiscard]] bool close_semaphore(std::uint32_t id) noexcept {
+        return semaphores_.erase(id) == 1U;
+    }
+
     [[nodiscard]] bool reset_event(std::uint32_t id) noexcept {
         auto it = events_.find(id);
         if (it == events_.end()) return false;
