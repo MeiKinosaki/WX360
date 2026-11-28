@@ -528,6 +528,38 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
         break;
     }
     case 19: {
+        if (d.xo == 0U) { // mcrf: copy one CR field to another.
+            const unsigned bf = (instruction >> 23U) & 7U;
+            const unsigned bfa = (instruction >> 18U) & 7U;
+            state.set_condition_field(bf, state.condition_field(bfa));
+            break;
+        }
+        if (d.xo == 257U || d.xo == 129U || d.xo == 289U ||
+            d.xo == 225U || d.xo == 33U || d.xo == 449U ||
+            d.xo == 417U || d.xo == 193U) { // CR logical bit operations.
+            const unsigned bt = (instruction >> 21U) & 0x1FU;
+            const unsigned ba = (instruction >> 16U) & 0x1FU;
+            const unsigned bb = (instruction >> 11U) & 0x1FU;
+            const auto cr_bit = [&state](unsigned bit) noexcept {
+                return (state.cr >> (31U - bit)) & 1U;
+            };
+            const unsigned a = cr_bit(ba), b = cr_bit(bb);
+            unsigned value = 0;
+            switch (d.xo) {
+            case 257: value = a & b; break;          // crand
+            case 129: value = a & (b ^ 1U); break;   // crandc
+            case 289: value = a ^ b ^ 1U; break;     // creqv
+            case 225: value = (a & b) ^ 1U; break;   // crnand
+            case 33:  value = (a | b) ^ 1U; break;   // crnor
+            case 449: value = a | b; break;          // cror
+            case 417: value = a | (b ^ 1U); break;   // crorc
+            case 193: value = a ^ b; break;          // crxor
+            default: break;
+            }
+            const std::uint32_t mask = std::uint32_t{1} << (31U - bt);
+            state.cr = (state.cr & ~mask) | (static_cast<std::uint32_t>(value) << (31U - bt));
+            break;
+        }
         if (d.xo == 528U) { // bcctr: conditional branch to CTR (CTR is not decremented).
             const unsigned bo = (instruction >> 21U) & 0x1FU;
             const unsigned bi = (instruction >> 16U) & 0x1FU;
