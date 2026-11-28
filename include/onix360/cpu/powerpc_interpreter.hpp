@@ -875,7 +875,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             }
             if (d.rc)
                 state.set_condition_field(6, all_true ? 0x8U :
-                    (all_false ? 0x2U : 0x4U));
+                    (all_false ? 0x2U : 0x0U));
         } else if (xo == 6U || xo == 70U || xo == 134U ||
                    xo == 518U || xo == 582U || xo == 646U ||
                    xo == 774U || xo == 838U || xo == 902U) {
@@ -918,7 +918,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             }
             if (d.rc)
                 state.set_condition_field(6, all_true ? 0x8U :
-                    (all_false ? 0x2U : 0x4U));
+                    (all_false ? 0x2U : 0x0U));
         } else if (xo == 4U || xo == 68U || xo == 132U ||
                    xo == 260U || xo == 324U || xo == 388U) {
             // VMX rounded averages: unsigned/signed byte, halfword and word.
