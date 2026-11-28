@@ -36,6 +36,12 @@
 - Foram adicionados testes sintéticos para essas instruções e corrigidos vetores de regressão de FPU/exceções.
 - Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece v0.7b.
 
+## VMX: estado de condição das comparações
+
+- Comparações vetoriais de inteiros e ponto flutuante atualizam CR6 quando o bit Rc está ativo.
+- CR6 distingue vetor totalmente verdadeiro, totalmente falso e resultado misto.
+- Testes sintéticos cobrem os três estados; a execução permanece sujeita à CI.
+
 ## VMX: operações de splat adicionadas
 
 - `VSPLTB`, `VSPLTH` e `VSPLTW`: selecionam um elemento de VA e o replicam nos 128 bits de VD.
