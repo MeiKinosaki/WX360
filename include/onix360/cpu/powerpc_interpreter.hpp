@@ -795,6 +795,22 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 out.lane[lane] = std::bit_cast<std::uint32_t>(
                     xo == 10U ? x + y : x - y);
             }
+        } else if (xo == 6U || xo == 70U || xo == 134U) {
+            // vcmpequb / vcmpequh / vcmpequw: all-ones for equal elements.
+            const unsigned width = xo == 6U ? 8U : (xo == 70U ? 16U : 32U);
+            const unsigned elements = 32U / width;
+            const std::uint32_t element_mask = width == 32U
+                ? 0xFFFFFFFFU : ((std::uint32_t{1} << width) - 1U);
+            for (unsigned word = 0; word < 4; ++word) {
+                std::uint32_t packed = 0;
+                for (unsigned element = 0; element < elements; ++element) {
+                    const unsigned shift = 32U - width * (element + 1U);
+                    const auto lhs = (a.lane[word] >> shift) & element_mask;
+                    const auto rhs = (b.lane[word] >> shift) & element_mask;
+                    if (lhs == rhs) packed |= element_mask << shift;
+                }
+                out.lane[word] = packed;
+            }
         } else if (xo == 4U || xo == 68U || xo == 132U ||
                    xo == 260U || xo == 324U || xo == 388U) {
             // VMX rounded averages: unsigned/signed byte, halfword and word.
