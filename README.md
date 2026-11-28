@@ -2,7 +2,7 @@
 
 **Windows Xbox 360 Emulator** — emulador experimental do Xbox 360 para Windows x64, com foco em computadores modestos.
 
-> **Versão em desenvolvimento:** vv1.0.3b (versão beta experimental; ainda não é uma versão estável). O projeto ainda não executa jogos comerciais.
+> **Versão em desenvolvimento:** v1.0.3b (versão beta experimental; ainda não é uma versão estável). O projeto ainda não executa jogos comerciais.
 >
 > **Marcos v0.7b validados em 24/11/2026:** testes de branches PowerPC `BCLR`/`BCCTR`, incluindo variantes com link, condições CR, destinos LR/CTR e semântica de CTR/LR passaram na CI #549 e #550. Isso valida apenas os testes do interpretador; não comprova boot de homebrew ou XEX comercial, assinatura RSA ou compatibilidade com jogos.
 
@@ -30,6 +30,7 @@
 ## Estado de desenvolvimento e limites
 
 - O núcleo tem implementações experimentais de CPU PowerPC, MMU/memória, kernel/heap, parser XEX, leitores ISO/STFS/SVOD, framebuffer/comandos Xenos, áudio, controles e save states.
+- A FPU PowerPC recebeu despacho por XO completo para `FNEG`, `FMR`, `FNABS` e `FABS`, com testes sintéticos; isso não representa compatibilidade integral com IEEE-754 ou com a FPU Xenon.
 - Os dez slots de save state armazenam snapshots do subconjunto atualmente serializado; não representam ainda um estado integral de todos os dispositivos.
 - A MMU hashed page table é um modelo PowerPC experimental, não uma implementação completa da MMU específica do Xenon.
 - O renderer Direct3D 11 é inicial; Vulkan, Direct3D 12 e OpenGL não devem ser considerados backends nativos completos.
@@ -41,7 +42,7 @@
 - O interpretador recebeu operações PowerPC de controle do FPSCR: `MCRFS`, `MTFSB0`, `MTFSB1` e `MTFSFI`.
 - O subconjunto VMX recebeu comparações vetoriais por igualdade e maior que, para elementos de 8, 16 e 32 bits, com variantes assinadas e não assinadas.
 - Foram adicionados testes sintéticos para essas instruções e corrigidos vetores de regressão de FPU/exceções.
-- Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece 1.0.1-preview.
+- Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece v1.0.3b.
 
 ## VMX: estado de condição das comparações
 
