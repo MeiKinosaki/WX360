@@ -45,7 +45,7 @@ int main() {
     XenonThreadState s;
     s.gpr[1] = 0x80FF010203040506ULL;
     check(execute(s, x_form(1, 2, 0, 122)) == StepResult::Executed &&
-          s.gpr[2] == 0x0108010101020102ULL,
+          s.gpr[2] == 0x0108010102010202ULL,
           "POPCNTB counts bits independently in each byte");
     check(execute(s, x_form(1, 3, 0, 378)) == StepResult::Executed &&
           s.gpr[3] == 7U,
