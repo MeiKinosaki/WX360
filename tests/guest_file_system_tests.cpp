@@ -3,6 +3,8 @@
 #include <array>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <vector>
 
 int main() {
     using namespace onix360::storage;
@@ -16,6 +18,21 @@ int main() {
           "mounts frontend-provided guest file");
     check(!fs.mount_file("../outside.bin", initial),
           "rejects traversal path during mount");
+    check(fs.create_file("Game/Saves/Profile.DAT"),
+          "creates a new guest save file within the sandbox");
+    check(!fs.create_file("game/saves/profile.dat"),
+          "rejects duplicate guest file creation case-insensitively");
+    const auto content_entries = fs.list_directory("GAME/CONTENT");
+    check(content_entries && *content_entries == std::vector<std::string>{"data.bin"},
+          "lists immediate guest directory entries");
+    const auto game_entries = fs.list_directory("game");
+    check(game_entries && *game_entries == std::vector<std::string>{"content", "saves"},
+          "lists child directories without exposing host paths");
+    const auto root_entries = fs.list_directory("");
+    check(root_entries && *root_entries == std::vector<std::string>{"game"},
+          "lists guest filesystem root");
+    check(!fs.list_directory("../outside"),
+          "rejects traversal in guest directory enumeration");
     const auto read_handle = fs.open("game/content/data.bin");
     check(read_handle.has_value(), "opens mounted file case-insensitively");
     std::array<std::uint8_t,3> first{};
