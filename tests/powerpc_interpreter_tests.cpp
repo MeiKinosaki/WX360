@@ -120,6 +120,14 @@ int main() {
           s.fpr[18] == 0xA1234567U && s.condition_field(1) == 0xAU,
           "MFFS copies FPSCR to FPR and updates CR1 when Rc is set");
     s.fpscr = 0x01234567U;
+    const std::uint32_t mtfsb1_fx = (63U << 26U) | (0U << 21U) | (38U << 1U);
+    check(execute(s, mtfsb1_fx) == StepResult::Executed &&
+          (s.fpscr & 0x80000000U) != 0U,
+          "MTFSB1 sets the selected FPSCR bit");
+    const std::uint32_t mtfsb0_fx = (63U << 26U) | (0U << 21U) | (70U << 1U);
+    check(execute(s, mtfsb0_fx) == StepResult::Executed &&
+          (s.fpscr & 0x80000000U) == 0U,
+          "MTFSB0 clears the selected FPSCR bit");
     s.fpr[19] = 0xF000000AULL;
     const std::uint32_t mtfsf = (63U << 26U) | (0x81U << 17U) |
         (19U << 11U) | (711U << 1U) | 1U;
