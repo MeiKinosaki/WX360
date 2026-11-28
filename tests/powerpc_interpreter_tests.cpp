@@ -914,6 +914,18 @@ int main() {
           s.vr[13].lane == std::array<std::uint32_t,4>{
               0U, 0xFFFFFFFFU, 0xFFFFFFFFU, 0U},
           "VMX VCMPGTFP compares floating-point lanes");
+    check(execute(s, vx_form(14, 0x1EU, 0U, 780U)) == StepResult::Executed &&
+          s.vr[14].lane == std::array<std::uint32_t,4>{
+              0xFEFEFEFEU, 0xFEFEFEFEU, 0xFEFEFEFEU, 0xFEFEFEFEU},
+          "VMX VSPLTISB broadcasts a signed byte immediate");
+    check(execute(s, vx_form(15, 0x11U, 0U, 844U)) == StepResult::Executed &&
+          s.vr[15].lane == std::array<std::uint32_t,4>{
+              0xFFFF0001U, 0xFFFF0001U, 0xFFFF0001U, 0xFFFF0001U},
+          "VMX VSPLTISH broadcasts a signed halfword immediate");
+    check(execute(s, vx_form(16, 0x1FU, 0U, 908U)) == StepResult::Executed &&
+          s.vr[16].lane == std::array<std::uint32_t,4>{
+              0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU},
+          "VMX VSPLTISW broadcasts a signed word immediate");
     s.vr[1].lane = {0x01030507U, 0x00020004U, 0x00000002U, 0xFEFCFAF8U};
     s.vr[2].lane = {0x02040608U, 0x00040006U, 0x00000004U, 0x00020406U};
     check(execute(s, vx_form(3, 1, 2, 4)) == StepResult::Executed &&
