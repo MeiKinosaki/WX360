@@ -2,9 +2,16 @@
 
 **Windows Xbox 360 Emulator** — emulador experimental do Xbox 360 para Windows x64, com foco em computadores modestos.
 
-> **Versão em desenvolvimento:** v0.7b. O projeto ainda não executa jogos comerciais.
+> **Versão em desenvolvimento:** v1.0.0-preview (prévia experimental; ainda não é uma versão estável). O projeto ainda não executa jogos comerciais.
 >
 > **Marcos v0.7b validados em 24/11/2026:** testes de branches PowerPC `BCLR`/`BCCTR`, incluindo variantes com link, condições CR, destinos LR/CTR e semântica de CTR/LR passaram na CI #549 e #550. Isso valida apenas os testes do interpretador; não comprova boot de homebrew ou XEX comercial, assinatura RSA ou compatibilidade com jogos.
+
+
+## Marco 1.0.0 Preview
+
+- Identificador de versão do projeto atualizado para `1.0.0` no CMake e `1.0.0-preview` na documentação.
+- Este marco é uma prévia de desenvolvimento, não uma declaração de estabilidade ou compatibilidade com jogos.
+- A promoção para 1.0.0 estável depende de CI verde em Windows e Linux, pacote portátil Windows gerado, regressões corrigidas e documentação das limitações remanescentes.
 
 ## Objetivos
 
@@ -34,7 +41,7 @@
 - O interpretador recebeu operações PowerPC de controle do FPSCR: `MCRFS`, `MTFSB0`, `MTFSB1` e `MTFSFI`.
 - O subconjunto VMX recebeu comparações vetoriais por igualdade e maior que, para elementos de 8, 16 e 32 bits, com variantes assinadas e não assinadas.
 - Foram adicionados testes sintéticos para essas instruções e corrigidos vetores de regressão de FPU/exceções.
-- Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece v0.7b.
+- Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece 1.0.0-preview.
 
 ## VMX: estado de condição das comparações
 
