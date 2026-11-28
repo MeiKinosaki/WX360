@@ -43,6 +43,20 @@ int main() {
     using namespace onix360::cpu;
     constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
     XenonThreadState s;
+    s.set_condition_field(2, 0x8U);
+    s.gpr[1] = 0x1111U;
+    s.gpr[2] = 0x2222U;
+    const std::uint32_t isel_cr2_lt = (31U << 26U) | (4U << 21U) |
+        (1U << 16U) | (2U << 11U) | (8U << 6U) | (15U << 1U);
+    check(execute(s, isel_cr2_lt) == StepResult::Executed && s.gpr[4] == 0x1111U,
+          "ISEL chooses RA when the selected CR bit is set");
+    s.set_condition_field(2, 0x4U);
+    check(execute(s, isel_cr2_lt) == StepResult::Executed && s.gpr[4] == 0x2222U,
+          "ISEL chooses RB when the selected CR bit is clear");
+    const std::uint32_t isel_zero = (31U << 26U) | (5U << 21U) |
+        (2U << 11U) | (8U << 6U) | (15U << 1U);
+    check(execute(s, isel_zero) == StepResult::Executed && s.gpr[5] == 0U,
+          "ISEL treats RA zero as a literal zero source");
     s.gpr[1] = 0x80FF010203040506ULL;
     check(execute(s, x_form(1, 2, 0, 122)) == StepResult::Executed &&
           s.gpr[2] == 0x0108010102010202ULL,
