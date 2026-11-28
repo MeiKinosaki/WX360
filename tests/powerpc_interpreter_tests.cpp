@@ -65,14 +65,24 @@ int main() {
     s.gpr[2] = 0x12345678U;
     const std::uint32_t rlwimi = (20U << 26U) | (2U << 21U) | (1U << 16U) |
         (8U << 11U) | (8U << 6U) | (15U << 1U);
-    check(execute(s, rlwimi) == StepResult::Executed &&
+    const auto rlwimi_step = execute(s, rlwimi);
+    if (rlwimi_step != StepResult::Executed ||
+        static_cast<std::uint32_t>(s.gpr[1]) != 0xA578A5A5U)
+        std::cerr << "DEBUG RLWIMI step=" << static_cast<int>(rlwimi_step)
+                  << " value=0x" << std::hex << s.gpr[1] << std::dec << '\\n';
+    check(rlwimi_step == StepResult::Executed &&
           static_cast<std::uint32_t>(s.gpr[1]) == 0xA578A5A5U,
           "RLWIMI inserts selected rotated bits while preserving other bits");
     s.gpr[1] = 0x12345678U;
     s.gpr[3] = 4U;
     const std::uint32_t rlwnm = (23U << 26U) | (1U << 21U) | (4U << 16U) |
         (3U << 11U) | (0U << 6U) | (31U << 1U);
-    check(execute(s, rlwnm) == StepResult::Executed &&
+    const auto rlwnm_step = execute(s, rlwnm);
+    if (rlwnm_step != StepResult::Executed ||
+        static_cast<std::uint32_t>(s.gpr[4]) != 0x91A2B3C0U)
+        std::cerr << "DEBUG RLWNM step=" << static_cast<int>(rlwnm_step)
+                  << " value=0x" << std::hex << s.gpr[4] << std::dec << '\\n';
+    check(rlwnm_step == StepResult::Executed &&
           static_cast<std::uint32_t>(s.gpr[4]) == 0x91A2B3C0U,
           "RLWNM rotates by RB and applies the full-word mask");
     s.set_condition_field(2, 0x8U);
@@ -80,7 +90,12 @@ int main() {
     s.gpr[2] = 0x2222U;
     const std::uint32_t isel_cr2_lt = (31U << 26U) | (4U << 21U) |
         (1U << 16U) | (2U << 11U) | (8U << 6U) | (15U << 1U);
-    check(execute(s, isel_cr2_lt) == StepResult::Executed && s.gpr[4] == 0x1111U,
+    const auto isel_true_step = execute(s, isel_cr2_lt);
+    if (isel_true_step != StepResult::Executed || s.gpr[4] != 0x1111U)
+        std::cerr << "DEBUG ISEL true step=" << static_cast<int>(isel_true_step)
+                  << " value=0x" << std::hex << s.gpr[4] << " CR=0x" << s.cr
+                  << std::dec << '\\n';
+    check(isel_true_step == StepResult::Executed && s.gpr[4] == 0x1111U,
           "ISEL chooses RA when the selected CR bit is set");
     s.set_condition_field(2, 0x4U);
     check(execute(s, isel_cr2_lt) == StepResult::Executed && s.gpr[4] == 0x2222U,
