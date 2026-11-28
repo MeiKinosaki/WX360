@@ -860,30 +860,41 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             if (width == 8U) packed *= 0x01010101U;
             else if (width == 16U) packed = (value << 16U) | value;
             out.lane.fill(packed);
-        } else if (xo == 198U || xo == 454U || xo == 710U) {
-            // vcmpeqfp / vcmpgefp / vcmpgtfp; unordered NaN comparisons are false.
+        } else if ((xo & ~1U) == 198U || (xo & ~1U) == 454U ||
+                   (xo & ~1U) == 710U) {
+            // vcmpeqfp / vcmpgefp / vcmpgtfp; XO bit 0 is the record bit.
+            // Unordered NaN comparisons are false.
+            const unsigned compare_xo = xo & ~1U;
             bool all_true = true;
             bool all_false = true;
             for (unsigned lane = 0; lane < 4; ++lane) {
                 const float lhs = std::bit_cast<float>(a.lane[lane]);
                 const float rhs = std::bit_cast<float>(b.lane[lane]);
-                const bool match = xo == 198U ? lhs == rhs :
-                    (xo == 454U ? lhs >= rhs : lhs > rhs);
+                const bool match = compare_xo == 198U ? lhs == rhs :
+                    (compare_xo == 454U ? lhs >= rhs : lhs > rhs);
                 all_true = all_true && match;
                 all_false = all_false && !match;
                 out.lane[lane] = match ? 0xFFFFFFFFU : 0U;
             }
-            if ((instruction & 1U) != 0U)
+            if ((xo & 1U) != 0U)
                 state.set_condition_field(6, all_true ? 0x8U :
                     (all_false ? 0x2U : 0x0U));
-        } else if (xo == 6U || xo == 70U || xo == 134U ||
-                   xo == 518U || xo == 582U || xo == 646U ||
-                   xo == 774U || xo == 838U || xo == 902U) {
+        } else if ((xo & ~1U) == 6U || (xo & ~1U) == 70U ||
+                   (xo & ~1U) == 134U || (xo & ~1U) == 518U ||
+                   (xo & ~1U) == 582U || (xo & ~1U) == 646U ||
+                   (xo & ~1U) == 774U || (xo & ~1U) == 838U ||
+                   (xo & ~1U) == 902U) {
             // VMX equality and greater-than compares for byte/halfword/word lanes.
-            const unsigned width = (xo == 6U || xo == 518U || xo == 774U) ? 8U :
-                (xo == 70U || xo == 582U || xo == 838U) ? 16U : 32U;
-            const bool equality = xo == 6U || xo == 70U || xo == 134U;
-            const bool signed_compare = xo == 774U || xo == 838U || xo == 902U;
+            // XO bit 0 controls CR6 recording and is not part of the operation.
+            const unsigned compare_xo = xo & ~1U;
+            const unsigned width = (compare_xo == 6U || compare_xo == 518U ||
+                                    compare_xo == 774U) ? 8U :
+                (compare_xo == 70U || compare_xo == 582U ||
+                 compare_xo == 838U) ? 16U : 32U;
+            const bool equality = compare_xo == 6U || compare_xo == 70U ||
+                                  compare_xo == 134U;
+            const bool signed_compare = compare_xo == 774U ||
+                compare_xo == 838U || compare_xo == 902U;
             const unsigned elements = 32U / width;
             const std::uint32_t element_mask = width == 32U
                 ? 0xFFFFFFFFU : ((std::uint32_t{1} << width) - 1U);
@@ -916,7 +927,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 }
                 out.lane[word] = packed;
             }
-            if ((instruction & 1U) != 0U)
+            if ((xo & 1U) != 0U)
                 state.set_condition_field(6, all_true ? 0x8U :
                     (all_false ? 0x2U : 0x0U));
         } else if (xo == 4U || xo == 68U || xo == 132U ||
