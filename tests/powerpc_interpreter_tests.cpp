@@ -597,6 +597,40 @@ int main() {
     check(s.gpr[10] == UINT64_MAX - 5U && (s.xer & xer_ca) != 0,
           "SUBFME computes complemented operand plus carry-in minus one");
 
+    // OE forms for ADDME/SUBFME update OV and sticky SO at signed boundaries.
+    s.gpr[3] = 0x8000000000000000ULL;
+    s.xer = 0;
+    check(execute(s, x_form(9, 3, 0, 234) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[9] == 0x7FFFFFFFFFFFFFFFULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "ADDME OE detects negative-boundary underflow and sets OV/SO");
+    s.gpr[3] = 0x8000000000000000ULL;
+    s.xer = xer_ca | xer_so_test;
+    check(execute(s, x_form(9, 3, 0, 234) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[9] == 0x8000000000000000ULL &&
+          (s.xer & xer_ov_test) == 0 &&
+          (s.xer & xer_so_test) != 0,
+          "ADDME OE clears OV without clearing sticky SO when CA prevents overflow");
+    s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
+    s.xer = 0;
+    check(execute(s, x_form(10, 3, 0, 232) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[10] == 0x7FFFFFFFFFFFFFFFULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "SUBFME OE detects positive-boundary overflow and sets OV/SO");
+    s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
+    s.xer = xer_ca | xer_so_test;
+    check(execute(s, x_form(10, 3, 0, 232) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[10] == 0x8000000000000000ULL &&
+          (s.xer & xer_ov_test) == 0 &&
+          (s.xer & xer_so_test) != 0,
+          "SUBFME OE clears OV without clearing sticky SO when CA prevents overflow");
+
     // Doubleword arithmetic shift must sign-fill and update XER[CA].
     s.gpr[1] = 0x8000000000000003ULL;
     s.gpr[2] = 1;
