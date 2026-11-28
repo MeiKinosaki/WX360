@@ -36,6 +36,13 @@
 - Foram adicionados testes sintéticos para essas instruções e corrigidos vetores de regressão de FPU/exceções.
 - Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece v0.7b.
 
+## VMX: operações de splat adicionadas
+
+- `VSPLTB`, `VSPLTH` e `VSPLTW`: selecionam um elemento de VA e o replicam nos 128 bits de VD.
+- `VSPLTISB`, `VSPLTISH` e `VSPLTISW`: estendem o imediato assinado de 5 bits e o replicam por todos os elementos do vetor.
+- Testes sintéticos cobrem seleção de byte/halfword/word e extensão de imediato negativo.
+- O suporte continua parcial: isso não equivale a implementar toda a ISA VMX nem comprova execução de jogos.
+
 ## Build e testes
 
 Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/testes; a existência de alvos no CMake não significa que tenham sido executados ou aprovados.
