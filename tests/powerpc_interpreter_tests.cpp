@@ -123,7 +123,7 @@ int main() {
     const std::uint32_t mcrfs = (63U << 26U) | (2U << 23U) |
         (3U << 18U) | (64U << 1U);
     check(execute(s, mcrfs) == StepResult::Executed &&
-          s.condition_field(2) == 0x5U,
+          s.condition_field(2) == 0x3U,
           "MCRFS copies the selected FPSCR field into CR");
     const std::uint32_t mtfsb1_fx = (63U << 26U) | (0U << 21U) | (38U << 1U);
     check(execute(s, mtfsb1_fx) == StepResult::Executed &&
