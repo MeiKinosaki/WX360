@@ -894,6 +894,19 @@ int main() {
     check(execute(s, vx_form(10, 1, 2, 902U)) == StepResult::Executed &&
           s.vr[10].lane[2] == 0U && s.vr[10].lane[3] == 0xFFFFFFFFU,
           "VMX VCMPGTSW compares signed word lanes");
+    s.vr[1].lane = {1U, 2U, 3U, 4U};
+    s.vr[2].lane = {1U, 2U, 3U, 4U};
+    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+          s.condition_field(6) == 0x8U,
+          "VMX compare record sets CR6 when every element matches");
+    s.vr[2].lane = {5U, 6U, 7U, 8U};
+    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+          s.condition_field(6) == 0x2U,
+          "VMX compare record sets CR6 when no element matches");
+    s.vr[2].lane = {1U, 6U, 3U, 8U};
+    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+          s.condition_field(6) == 0x4U,
+          "VMX compare record sets CR6 for mixed element results");
     s.vr[1].lane = {std::bit_cast<std::uint32_t>(1.0F),
                     std::bit_cast<std::uint32_t>(2.0F),
                     std::bit_cast<std::uint32_t>(-1.0F),
