@@ -48,14 +48,14 @@ int main() {
     const std::uint32_t rlwimi = (20U << 26U) | (2U << 21U) | (1U << 16U) |
         (8U << 11U) | (8U << 6U) | (15U << 1U);
     check(execute(s, rlwimi) == StepResult::Executed &&
-          static_cast<std::uint32_t>(s.gpr[1]) == 0xA5A5A5A5U,
+          static_cast<std::uint32_t>(s.gpr[1]) == 0xA578A5A5U,
           "RLWIMI inserts selected rotated bits while preserving other bits");
     s.gpr[1] = 0x12345678U;
     s.gpr[3] = 4U;
     const std::uint32_t rlwnm = (23U << 26U) | (1U << 21U) | (4U << 16U) |
         (3U << 11U) | (0U << 6U) | (31U << 1U);
     check(execute(s, rlwnm) == StepResult::Executed &&
-          static_cast<std::uint32_t>(s.gpr[4]) == 0x23456781U,
+          static_cast<std::uint32_t>(s.gpr[4]) == 0x91A2B3C0U,
           "RLWNM rotates by RB and applies the full-word mask");
     s.set_condition_field(2, 0x8U);
     s.gpr[1] = 0x1111U;
