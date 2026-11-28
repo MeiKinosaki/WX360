@@ -624,6 +624,25 @@ int main() {
           (s.xer & xer_so_test) != 0,
           "ADDZE OE clears OV and preserves sticky SO without carry-in");
 
+    s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
+    s.gpr[4] = 0;
+    s.xer = 1ULL << 29U;
+    check(execute(s, x_form(13, 3, 4, 138) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[13] == 0x8000000000000000ULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "ADDE OE detects signed overflow from carry-in");
+    s.gpr[3] = 1;
+    s.gpr[4] = 2;
+    s.xer = xer_so_test;
+    check(execute(s, x_form(13, 3, 4, 138) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[13] == 3 &&
+          (s.xer & xer_ov_test) == 0 &&
+          (s.xer & xer_so_test) != 0,
+          "ADDE OE clears OV and preserves sticky SO without overflow");
+
     // OE forms for ADDME/SUBFME update OV and sticky SO at signed boundaries.
     s.gpr[3] = 0x8000000000000000ULL;
     s.xer = 0;
