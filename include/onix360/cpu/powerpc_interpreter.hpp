@@ -795,9 +795,14 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 out.lane[lane] = std::bit_cast<std::uint32_t>(
                     xo == 10U ? x + y : x - y);
             }
-        } else if (xo == 6U || xo == 70U || xo == 134U) {
-            // vcmpequb / vcmpequh / vcmpequw: all-ones for equal elements.
-            const unsigned width = xo == 6U ? 8U : (xo == 70U ? 16U : 32U);
+        } else if (xo == 6U || xo == 70U || xo == 134U ||
+                   xo == 518U || xo == 582U || xo == 646U ||
+                   xo == 774U || xo == 838U || xo == 902U) {
+            // VMX equality and greater-than compares for byte/halfword/word lanes.
+            const unsigned width = (xo == 6U || xo == 518U || xo == 774U) ? 8U :
+                (xo == 70U || xo == 582U || xo == 838U) ? 16U : 32U;
+            const bool equality = xo == 6U || xo == 70U || xo == 134U;
+            const bool signed_compare = xo == 774U || xo == 838U || xo == 902U;
             const unsigned elements = 32U / width;
             const std::uint32_t element_mask = width == 32U
                 ? 0xFFFFFFFFU : ((std::uint32_t{1} << width) - 1U);
@@ -807,7 +812,22 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                     const unsigned shift = 32U - width * (element + 1U);
                     const auto lhs = (a.lane[word] >> shift) & element_mask;
                     const auto rhs = (b.lane[word] >> shift) & element_mask;
-                    if (lhs == rhs) packed |= element_mask << shift;
+                    bool match = false;
+                    if (equality) {
+                        match = lhs == rhs;
+                    } else if (signed_compare && width == 8U) {
+                        match = std::bit_cast<std::int8_t>(static_cast<std::uint8_t>(lhs)) >
+                                std::bit_cast<std::int8_t>(static_cast<std::uint8_t>(rhs));
+                    } else if (signed_compare && width == 16U) {
+                        match = std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(lhs)) >
+                                std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(rhs));
+                    } else if (signed_compare) {
+                        match = std::bit_cast<std::int32_t>(lhs) >
+                                std::bit_cast<std::int32_t>(rhs);
+                    } else {
+                        match = lhs > rhs;
+                    }
+                    if (match) packed |= element_mask << shift;
                 }
                 out.lane[word] = packed;
             }
