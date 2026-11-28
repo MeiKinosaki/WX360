@@ -673,7 +673,7 @@ int main() {
     check(s.gpr[28] == halfword_ra_before_fault, "LHZU fault leaves RA unchanged");
 
     const auto old_pc = s.pc;
-    check(execute(s, 0x10000000U) == StepResult::UnsupportedInstruction, "unknown vector instruction is rejected");
+    check(execute(s, 0x100007FFU) == StepResult::UnsupportedInstruction, "unknown vector instruction is rejected");
     check(s.pc == old_pc, "unsupported instruction does not advance PC");
 
     // Additional integer ISA coverage used by Xenon game code.
