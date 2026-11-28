@@ -1256,6 +1256,20 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             writes_result = true;
             break;
         }
+        case 512: { // mcrxr: move XER[SO,OV,CA] into a CR field and clear them.
+            const unsigned bf = (instruction >> 23U) & 7U;
+            constexpr std::uint64_t xer_so_ov_ca =
+                (std::uint64_t{1} << 31U) |
+                (std::uint64_t{1} << 30U) |
+                (std::uint64_t{1} << 29U);
+            const std::uint8_t field = static_cast<std::uint8_t>(
+                ((state.xer >> 31U) & 1U) << 3U |
+                ((state.xer >> 30U) & 1U) << 2U |
+                ((state.xer >> 29U) & 1U) << 1U);
+            state.set_condition_field(bf, field);
+            state.xer &= ~xer_so_ov_ca;
+            break;
+        }
         case 467: { // mtspr: supported Xenon-visible SPRs
             const unsigned spr = (((instruction >> 11U) & 0x1FU) << 5U) |
                                  ((instruction >> 16U) & 0x1FU);
