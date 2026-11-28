@@ -33,6 +33,20 @@ int main() {
           "lists guest filesystem root");
     check(!fs.list_directory("../outside"),
           "rejects traversal in guest directory enumeration");
+    check(fs.create_file("game/saves/temp.dat"),
+          "creates temporary guest file for rename/delete testing");
+    const auto temp_handle = fs.open("game/saves/temp.dat", GuestFileMode::ReadWrite);
+    check(temp_handle.has_value(), "opens newly created guest save file");
+    check(fs.rename_file("game/saves/temp.dat", "game/saves/renamed.dat"),
+          "renames a guest file inside the sandbox");
+    check(fs.file_size(*temp_handle).has_value(),
+          "open file handle remains valid after guest rename");
+    check(!fs.remove_file("game/saves/renamed.dat"),
+          "refuses to remove a file while a guest handle is open");
+    check(fs.close(*temp_handle) && fs.remove_file("game/saves/renamed.dat"),
+          "removes guest file after its last handle is closed");
+    check(!fs.open("game/saves/renamed.dat"),
+          "removed guest file can no longer be opened");
     const auto read_handle = fs.open("game/content/data.bin");
     check(read_handle.has_value(), "opens mounted file case-insensitively");
     std::array<std::uint8_t,3> first{};
