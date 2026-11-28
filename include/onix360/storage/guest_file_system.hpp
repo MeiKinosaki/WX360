@@ -62,6 +62,34 @@ public:
         return result;
     }
 
+    [[nodiscard]] bool rename_file(std::string_view old_path,
+                                    std::string_view new_path) {
+        const auto old_name = normalize(old_path);
+        const auto new_name = normalize(new_path);
+        if (!old_name || !new_name || *old_name == *new_name ||
+            !files_.contains(*old_name) || files_.contains(*new_name))
+            return false;
+        auto node = files_.extract(*old_name);
+        node.key() = *new_name;
+        const auto inserted = files_.insert(std::move(node));
+        if (!inserted.inserted) return false;
+        for (auto& [handle, open_file] : open_files_) {
+            (void)handle;
+            if (open_file.path == *old_name) open_file.path = *new_name;
+        }
+        return true;
+    }
+
+    [[nodiscard]] bool remove_file(std::string_view path) {
+        const auto normalized = normalize(path);
+        if (!normalized || !files_.contains(*normalized)) return false;
+        for (const auto& [handle, open_file] : open_files_) {
+            (void)handle;
+            if (open_file.path == *normalized) return false;
+        }
+        return files_.erase(*normalized) == 1U;
+    }
+
     [[nodiscard]] bool mount_file(std::string_view path,
                                   std::span<const std::uint8_t> bytes) {
         const auto normalized = normalize(path);
