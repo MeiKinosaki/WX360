@@ -75,3 +75,10 @@ Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/
 - `POPCNTB` conta bits por byte; `POPCNTW` e `POPCNTD` contam bits em word e doubleword.
 - `ISEL` seleciona um registrador ou zero conforme um bit do CR.
 - Testes sintéticos foram adicionados para os resultados, seleção de CR e atualização do XER. A CI desta revisão ainda precisa executar; não declarar esses testes aprovados antes do resultado.
+
+## Cobertura adicional do registrador de condição PowerPC
+
+- `RLWIMI` e `RLWNM`: rotação de word com inserção/máscara.
+- `MCRF`: cópia de campos do Condition Register.
+- Operações lógicas CR: `CRAND`, `CRANDC`, `CREQV`, `CRNAND`, `CRNOR`, `CROR`, `CRORC` e `CRXOR`.
+- Testes sintéticos foram adicionados; a execução na CI desta revisão ainda precisa ser confirmada.
