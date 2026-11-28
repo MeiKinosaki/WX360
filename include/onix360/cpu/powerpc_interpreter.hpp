@@ -1619,14 +1619,22 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             writes_result = true;
             break;
         }
-        case 200: { // subfze (OE=0 only): RT = ~RA + XER[CA]
-            if ((instruction & (1U << 10U)) != 0) return StepResult::UnsupportedInstruction;
+        case 200: { // subfze: RT = ~RA + XER[CA], with optional OE.
             const std::uint64_t lhs = ~state.gpr[d.ra];
             const std::uint64_t carry_in = (state.xer >> 29U) & 1U;
             result = lhs + carry_in;
             constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
+            constexpr std::uint64_t xer_ov = std::uint64_t{1} << 30U;
+            constexpr std::uint64_t xer_so = std::uint64_t{1} << 31U;
             state.xer = (carry_in != 0 && result == 0)
                 ? (state.xer | xer_ca) : (state.xer & ~xer_ca);
+            if ((instruction & (1U << 10U)) != 0) {
+                // Signed overflow: ~RA is INT64_MAX and CA adds one.
+                const bool overflow = carry_in != 0 &&
+                    state.gpr[d.ra] == 0x8000000000000000ULL;
+                state.xer = overflow ? (state.xer | xer_ov | xer_so)
+                                     : (state.xer & ~xer_ov);
+            }
             destination = d.rt;
             writes_result = true;
             break;
