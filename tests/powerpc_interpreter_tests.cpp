@@ -276,6 +276,28 @@ int main() {
     const std::uint32_t frsp = (63U << 26U) | (12U << 1U);
     check(execute(s, frsp) == StepResult::Executed, "FRSP executes");
 
+    s.fpr[1] = std::bit_cast<std::uint64_t>(-3.5);
+    const std::uint32_t fneg = (63U << 26U) | (3U << 21U) |
+        (1U << 16U) | (40U << 1U);
+    check(execute(s, fneg) == StepResult::Executed &&
+          std::bit_cast<double>(s.fpr[3]) == 3.5,
+          "FNEG uses the full XO field and negates FRA");
+    const std::uint32_t fabs_ins = (63U << 26U) | (4U << 21U) |
+        (1U << 16U) | (264U << 1U);
+    check(execute(s, fabs_ins) == StepResult::Executed &&
+          std::bit_cast<double>(s.fpr[4]) == 3.5,
+          "FABS uses the full XO field and clears the sign");
+    const std::uint32_t fnabs = (63U << 26U) | (5U << 21U) |
+        (1U << 16U) | (136U << 1U);
+    check(execute(s, fnabs) == StepResult::Executed &&
+          std::bit_cast<double>(s.fpr[5]) == -3.5,
+          "FNABS uses the full XO field and returns negative absolute value");
+    const std::uint32_t fmr = (63U << 26U) | (6U << 21U) |
+        (1U << 16U) | (72U << 1U);
+    check(execute(s, fmr) == StepResult::Executed &&
+          s.fpr[6] == s.fpr[1],
+          "FMR copies FRA using the full XO field");
+
     s.fpr[1] = std::bit_cast<std::uint64_t>(1.0);
     s.fpr[2] = std::bit_cast<std::uint64_t>(0.0);
     const std::uint32_t fdiv_zero = (63U << 26U) | (13U << 21U) |
