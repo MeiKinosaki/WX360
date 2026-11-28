@@ -43,6 +43,13 @@ int main() {
     using namespace onix360::cpu;
     constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
     XenonThreadState s;
+    s.xer = (std::uint64_t{1} << 31U) |
+            (std::uint64_t{1} << 30U) |
+            (std::uint64_t{1} << 29U) | 0x1234U;
+    check(execute(s, x_form(12, 0, 0, 512)) == StepResult::Executed,
+          "MCRXR transfers XER status bits into CR");
+    check(s.condition_field(3) == 0xEU && s.xer == 0x1234U,
+          "MCRXR preserves unrelated XER bits and clears SO/OV/CA");
     s.reset(0x1000);
     // Initial double-precision FPU arithmetic coverage.
     s.fpr[1] = std::bit_cast<std::uint64_t>(1.5);
