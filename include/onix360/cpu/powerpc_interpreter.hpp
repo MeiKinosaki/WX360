@@ -816,6 +816,21 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 out.lane[lane] = std::bit_cast<std::uint32_t>(
                     xo == 10U ? x + y : x - y);
             }
+        } else if (xo == 780U || xo == 844U || xo == 908U) {
+            // vspltisb / vspltish / vspltisw: sign-extend SIMM5 and
+            // broadcast it to every byte, halfword, or word element.
+            const unsigned width = xo == 780U ? 8U : (xo == 844U ? 16U : 32U);
+            const std::int32_t immediate = static_cast<std::int32_t>(
+                static_cast<std::int8_t>((d.ra & 0x10U) != 0U
+                    ? (d.ra | 0xE0U) : d.ra));
+            const std::uint32_t element_mask = width == 32U
+                ? 0xFFFFFFFFU : ((std::uint32_t{1} << width) - 1U);
+            const std::uint32_t value =
+                static_cast<std::uint32_t>(immediate) & element_mask;
+            std::uint32_t packed = value;
+            if (width == 8U) packed *= 0x01010101U;
+            else if (width == 16U) packed = (value << 16U) | value;
+            out.lane.fill(packed);
         } else if (xo == 198U || xo == 454U || xo == 710U) {
             // vcmpeqfp / vcmpgefp / vcmpgtfp; unordered NaN comparisons are false.
             for (unsigned lane = 0; lane < 4; ++lane) {
