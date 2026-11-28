@@ -862,13 +862,20 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             out.lane.fill(packed);
         } else if (xo == 198U || xo == 454U || xo == 710U) {
             // vcmpeqfp / vcmpgefp / vcmpgtfp; unordered NaN comparisons are false.
+            bool all_true = true;
+            bool all_false = true;
             for (unsigned lane = 0; lane < 4; ++lane) {
                 const float lhs = std::bit_cast<float>(a.lane[lane]);
                 const float rhs = std::bit_cast<float>(b.lane[lane]);
                 const bool match = xo == 198U ? lhs == rhs :
                     (xo == 454U ? lhs >= rhs : lhs > rhs);
+                all_true = all_true && match;
+                all_false = all_false && !match;
                 out.lane[lane] = match ? 0xFFFFFFFFU : 0U;
             }
+            if (d.rc)
+                state.set_condition_field(6, all_true ? 0x8U :
+                    (all_false ? 0x2U : 0x4U));
         } else if (xo == 6U || xo == 70U || xo == 134U ||
                    xo == 518U || xo == 582U || xo == 646U ||
                    xo == 774U || xo == 838U || xo == 902U) {
@@ -880,6 +887,8 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             const unsigned elements = 32U / width;
             const std::uint32_t element_mask = width == 32U
                 ? 0xFFFFFFFFU : ((std::uint32_t{1} << width) - 1U);
+            bool all_true = true;
+            bool all_false = true;
             for (unsigned word = 0; word < 4; ++word) {
                 std::uint32_t packed = 0;
                 for (unsigned element = 0; element < elements; ++element) {
@@ -901,10 +910,15 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                     } else {
                         match = lhs > rhs;
                     }
+                    all_true = all_true && match;
+                    all_false = all_false && !match;
                     if (match) packed |= element_mask << shift;
                 }
                 out.lane[word] = packed;
             }
+            if (d.rc)
+                state.set_condition_field(6, all_true ? 0x8U :
+                    (all_false ? 0x2U : 0x4U));
         } else if (xo == 4U || xo == 68U || xo == 132U ||
                    xo == 260U || xo == 324U || xo == 388U) {
             // VMX rounded averages: unsigned/signed byte, halfword and word.
