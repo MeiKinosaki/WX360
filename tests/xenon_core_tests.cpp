@@ -93,7 +93,7 @@ int main() {
     const std::array<std::uint8_t, 12> fault_batch_code{
         0x38, 0x60, 0x00, 0x01, // addi r3,r0,1
         0x38, 0x80, 0x00, 0x02, // addi r4,r0,2
-        0x10, 0x00, 0x00, 0x00  // unsupported vector instruction encoding
+        0x10, 0x00, 0x07, 0xFF  // unsupported vector instruction encoding
     };
     check(fault_batch_ram.write(0x100, fault_batch_code) == memory::MemoryResult::Ok,
           "place valid instructions followed by unsupported instruction");
