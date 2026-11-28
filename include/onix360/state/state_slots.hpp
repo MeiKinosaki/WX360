@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <string>
+#include <vector>
 namespace onix360::state {
 class StateSlots {
 public:
@@ -10,6 +11,16 @@ public:
  explicit StateSlots(std::filesystem::path directory):directory_(std::move(directory)){}
  static bool valid_slot(unsigned slot) noexcept{return slot<kSlotCount;}
  std::filesystem::path path_for(unsigned slot)const{return directory_/("slot_"+std::to_string(slot)+".onix360");}
+ std::vector<unsigned> occupied_slots()const{
+  std::vector<unsigned> result;
+  for(unsigned slot=0;slot<kSlotCount;++slot)if(exists(slot))result.push_back(slot);
+  return result;
+ }
+ std::vector<unsigned> available_slots()const{
+  std::vector<unsigned> result;
+  for(unsigned slot=0;slot<kSlotCount;++slot)if(!exists(slot))result.push_back(slot);
+  return result;
+ }
  bool exists(unsigned slot)const{return valid_slot(slot)&&std::filesystem::is_regular_file(path_for(slot));}
  bool save(unsigned slot,const Snapshot& snapshot,std::string* error=nullptr)const{
   if(!valid_slot(slot))return fail(error,"save-state slot is out of range");
