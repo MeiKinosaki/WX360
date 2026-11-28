@@ -89,6 +89,14 @@ int main() {
         (2U << 11U) | (8U << 6U) | (15U << 1U);
     check(execute(s, isel_zero) == StepResult::Executed && s.gpr[5] == 0U,
           "ISEL treats RA zero as a literal zero source");
+    s.gpr[1] = 0x0000000010000000ULL;
+    check(execute(s, x_form(1, 6, 0, 26)) == StepResult::Executed &&
+          s.gpr[6] == 3U,
+          "CNTLZW counts leading zeroes in the low word");
+    s.gpr[1] = 0xFFFFFFFF00000000ULL;
+    check(execute(s, x_form(1, 7, 0, 26)) == StepResult::Executed &&
+          s.gpr[7] == 32U,
+          "CNTLZW returns 32 for a zero low word");
     s.gpr[1] = 0x80FF010203040506ULL;
     check(execute(s, x_form(1, 2, 0, 122)) == StepResult::Executed &&
           s.gpr[2] == 0x0108010102010202ULL,
