@@ -632,6 +632,16 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
         const double a = std::bit_cast<double>(state.fpr[d.ra]);
         const double b = std::bit_cast<double>(state.fpr[d.rb]);
         const unsigned fp_xo = (instruction >> 1U) & 0x1FU;
+        if (d.xo == 38U || d.xo == 70U) { // mtfsb1 / mtfsb0
+            const unsigned bit = (instruction >> 21U) & 0x1FU;
+            const std::uint32_t mask = std::uint32_t{1} << (31U - bit);
+            if (d.xo == 38U) state.fpscr |= mask;
+            else state.fpscr &= ~mask;
+            if ((instruction & 1U) != 0)
+                state.set_condition_field(1,
+                    static_cast<std::uint8_t>((state.fpscr >> 28U) & 0xFU));
+            break;
+        }
         if (d.xo == 583U) { // mffs
             state.fpr[d.rt] = static_cast<std::uint64_t>(state.fpscr);
             if ((instruction & 1U) != 0)
