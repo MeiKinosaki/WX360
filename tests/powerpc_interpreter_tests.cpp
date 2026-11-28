@@ -140,6 +140,7 @@ int main() {
           (s.fpscr & 0x80000000U) == 0U,
           "MTFSB0 clears the selected FPSCR bit");
     s.fpr[19] = 0xF000000AULL;
+    s.fpscr = 0x01234567U;
     const std::uint32_t mtfsf = (63U << 26U) | (0x81U << 17U) |
         (19U << 11U) | (711U << 1U) | 1U;
     check(execute(s, mtfsf) == StepResult::Executed &&
@@ -882,6 +883,7 @@ int main() {
           s.vr[6].lane[0] == 0xFF00FF00U,
           "VMX VCMPGTUB compares unsigned byte lanes");
     check(execute(s, vx_form(7, 1, 2, 774U)) == StepResult::Executed &&
+          (std::cerr << "VCMPGTSB=" << std::hex << s.vr[7].lane[0] << std::dec << "\\n", true) &&
           s.vr[7].lane[0] == 0x000000FFU,
           "VMX VCMPGTSB compares signed byte lanes");
     check(execute(s, vx_form(8, 1, 2, 838U)) == StepResult::Executed &&
