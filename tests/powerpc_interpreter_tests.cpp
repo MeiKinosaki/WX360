@@ -608,7 +608,7 @@ int main() {
               (xer_ov_test | xer_so_test),
           "SUBFE OE detects signed overflow from complemented RA plus RB");
     s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
-    s.xer = 0;
+    s.xer = xer_ca;
     check(execute(s, x_form(12, 3, 0, 202) | (1U << 10U)) ==
               StepResult::Executed &&
           s.gpr[12] == 0x8000000000000000ULL &&
