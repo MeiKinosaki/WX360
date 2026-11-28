@@ -35,9 +35,11 @@ constexpr std::uint32_t x_form(unsigned rt, unsigned ra, unsigned rb, unsigned x
 }
 
 int main() {
-    const auto vx_form = [](unsigned vd, unsigned va, unsigned vb, unsigned xo) {
+    const auto vx_form = [](unsigned vd, unsigned va, unsigned vb, unsigned xo,
+                            bool record = false) {
         return (4U << 26U) | (vd << 21U) | (va << 16U) |
-               (vb << 11U) | (xo & 0x7FFU);
+               (vb << 11U) | ((xo & 0x7FFU) << 1U) |
+               (record ? 1U : 0U);
     };
     using namespace onix360::cpu;
     constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
@@ -896,15 +898,15 @@ int main() {
           "VMX VCMPGTSW compares signed word lanes");
     s.vr[1].lane = {1U, 2U, 3U, 4U};
     s.vr[2].lane = {1U, 2U, 3U, 4U};
-    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+    check(execute(s, vx_form(20, 1, 2, 135U, true)) == StepResult::Executed &&
           s.condition_field(6) == 0x8U,
           "VMX compare record sets CR6 when every element matches");
     s.vr[2].lane = {5U, 6U, 7U, 8U};
-    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+    check(execute(s, vx_form(20, 1, 2, 135U, true)) == StepResult::Executed &&
           s.condition_field(6) == 0x2U,
           "VMX compare record sets CR6 when no element matches");
     s.vr[2].lane = {1U, 6U, 3U, 8U};
-    check(execute(s, vx_form(20, 1, 2, 135U)) == StepResult::Executed &&
+    check(execute(s, vx_form(20, 1, 2, 135U, true)) == StepResult::Executed &&
           s.condition_field(6) == 0x0U,
           "VMX compare record clears CR6 result bits for mixed element results");
     s.vr[1].lane = {std::bit_cast<std::uint32_t>(1.0F),
