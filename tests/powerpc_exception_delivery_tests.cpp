@@ -39,7 +39,7 @@ int main() {
     onix360::memory::AddressSpace address_space;
     check(address_space.map_page(0x80000000,0x2000,3U)==onix360::memory::MemoryResult::Ok,"maps writable virtual page");
     check(address_space.map_page(0x80001000,0x3000,1U)==onix360::memory::MemoryResult::Ok,"maps read-only virtual page");
-    onix360::cpu::AddressSpaceMemoryBus bus{&address_space,&physical};
+    onix360::cpu::AddressSpaceMemoryBus bus{&address_space,&physical,&state};
     const auto callbacks=bus.callbacks();
     state.reset(0x4000); state.gpr[3]=0x12345678;
     check(execute_with_exception_delivery(state,d_form(36,3,0,0x8000),{},nullptr,&callbacks)==StepResult::MemoryFault,"unmapped virtual store faults");
