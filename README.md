@@ -56,6 +56,14 @@
 - Testes sintéticos cobrem seleção de byte/halfword/word e extensão de imediato negativo.
 - O suporte continua parcial: isso não equivale a implementar toda a ISA VMX nem comprova execução de jogos.
 
+## Armazenamento de arquivos de convidado e save slots
+
+- O sistema de arquivos de convidado agora cria arquivos dentro do sandbox, enumera entradas imediatas de diretórios e da raiz, renomeia arquivos e remove arquivos sem handles abertos.
+- Caminhos continuam normalizados e protegidos contra traversal; nenhuma operação permite acesso arbitrário ao sistema de arquivos do host.
+- Os dez slots agora expõem enumeração separada de slots ocupados e disponíveis e usam a extensão `.onix360`.
+- O snapshot continua parcial: CPU e RAM são serializadas; GPU, áudio, dispositivos, scheduler e estado integral do kernel ainda não estão incluídos.
+- Os novos testes foram enviados à CI e aguardam validação.
+
 ## Build e testes
 
 Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/testes; a existência de alvos no CMake não significa que tenham sido executados ou aprovados.
