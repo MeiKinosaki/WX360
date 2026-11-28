@@ -120,6 +120,12 @@ int main() {
           s.fpr[18] == 0xA1234567U && s.condition_field(1) == 0xAU,
           "MFFS copies FPSCR to FPR and updates CR1 when Rc is set");
     s.fpscr = 0x01234567U;
+    const std::uint32_t mtfsfi = (63U << 26U) | (4U << 23U) |
+        (0xAU << 12U) | (134U << 1U) | 1U;
+    check(execute(s, mtfsfi) == StepResult::Executed &&
+          ((s.fpscr >> 12U) & 0xFU) == 0xAU &&
+          s.condition_field(1) == ((s.fpscr >> 28U) & 0xFU),
+          "MTFSFI updates a selected FPSCR nibble and records CR1");
     const std::uint32_t mcrfs = (63U << 26U) | (2U << 23U) |
         (3U << 18U) | (64U << 1U);
     check(execute(s, mcrfs) == StepResult::Executed &&
