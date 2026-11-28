@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <vector>
 namespace {int failures=0;void check(bool v,const char*m){if(!v){std::cerr<<"FAIL: "<<m<<'\n';++failures;}}}
 int main(){
  using namespace onix360::state;
@@ -13,6 +14,12 @@ int main(){
  check(slots.save(0,first,&error),"saves slot zero");
  check(slots.save(1,second,&error),"saves slot one");
  check(slots.exists(0)&&slots.exists(1),"lists occupied slots");
+ check(slots.occupied_slots()==std::vector<unsigned>{0U,1U},
+       "enumerates occupied save-state slots in numeric order");
+ check(slots.available_slots().size()==8U&&slots.available_slots().front()==2U,
+       "enumerates the eight available save-state slots");
+ check(slots.path_for(0).extension()==".onix360",
+       "uses the Onix360 save-state file extension");
  Snapshot loaded;check(slots.load(0,loaded,&error),"loads slot zero");
  check(loaded.cpu.pc==first.cpu.pc&&loaded.ram==first.ram,"slot zero restores its own snapshot");
  check(slots.load(1,loaded,&error),"loads slot one");
