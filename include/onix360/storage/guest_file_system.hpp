@@ -22,6 +22,46 @@ class GuestFileSystem {
 public:
     static constexpr std::size_t maximum_file_size = 64U * 1024U * 1024U;
 
+    static constexpr std::size_t maximum_mounted_files = 4096U;
+
+    [[nodiscard]] bool create_file(std::string_view path) {
+        const auto normalized = normalize(path);
+        if (!normalized || files_.contains(*normalized) ||
+            files_.size() >= maximum_mounted_files) return false;
+        files_.emplace(*normalized, std::vector<std::uint8_t>{});
+        return true;
+    }
+
+    // Returns immediate file/directory names in stable lexical order. An empty
+    // path or "/" denotes the guest filesystem root; invalid paths return nullopt.
+    [[nodiscard]] std::optional<std::vector<std::string>> list_directory(
+        std::string_view path) const {
+        std::string normalized;
+        if (!path.empty() && path != "/" && path != "\\") {
+            const auto value = normalize(path);
+            if (!value) return std::nullopt;
+            normalized = *value;
+        }
+        const std::string prefix = normalized.empty() ? std::string{} : normalized + "/";
+        std::map<std::string, bool> entries;
+        for (const auto& [file_path, bytes] : files_) {
+            (void)bytes;
+            if (!file_path.starts_with(prefix)) continue;
+            const auto remainder = file_path.substr(prefix.size());
+            if (remainder.empty()) continue;
+            const auto separator = remainder.find('/');
+            const auto name = remainder.substr(0, separator);
+            entries.emplace(name, separator != std::string::npos);
+        }
+        std::vector<std::string> result;
+        result.reserve(entries.size());
+        for (const auto& [name, is_directory] : entries) {
+            (void)is_directory;
+            result.push_back(name);
+        }
+        return result;
+    }
+
     [[nodiscard]] bool mount_file(std::string_view path,
                                   std::span<const std::uint8_t> bytes) {
         const auto normalized = normalize(path);
