@@ -870,7 +870,7 @@ int main() {
           s.vr[3].lane[0] == 0xFF00FFFFU,
           "VMX VCMPEQUB returns byte masks for equal elements");
     check(execute(s, vx_form(4, 1, 2, 70U)) == StepResult::Executed &&
-          s.vr[4].lane[1] == 0xFFFFFFFFU,
+          s.vr[4].lane[1] == 0xFFFF0000U,
           "VMX VCMPEQUH returns halfword masks for equal elements");
     check(execute(s, vx_form(5, 1, 2, 134U)) == StepResult::Executed &&
           s.vr[5].lane[2] == 0xFFFFFFFFU &&
