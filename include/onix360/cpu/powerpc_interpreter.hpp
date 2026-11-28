@@ -489,8 +489,34 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                  (static_cast<std::uint64_t>(static_cast<std::int64_t>(d.immediate)) << 16U);
         writes_result = true;
         break;
+    case 20: { // rlwimi: rotate word then insert selected mask bits into RA.
+        const unsigned shift = (instruction >> 11U) & 0x1FU;
+        const unsigned mb = (instruction >> 6U) & 0x1FU;
+        const unsigned me = (instruction >> 1U) & 0x1FU;
+        const std::uint32_t mask = mask32(mb, me);
+        const auto rotated = static_cast<std::uint32_t>(rotate_left_32(
+            static_cast<std::uint32_t>(state.gpr[d.rt]), shift));
+        const auto previous = static_cast<std::uint32_t>(state.gpr[d.ra]);
+        result = (previous & ~mask) | (rotated & mask);
+        destination = d.ra;
+        writes_result = true;
+        record_32bit = true;
+        break;
+    }
     case 21: { // rlwinm
         const unsigned shift = (instruction >> 11U) & 0x1FU;
+        const unsigned mb = (instruction >> 6U) & 0x1FU;
+        const unsigned me = (instruction >> 1U) & 0x1FU;
+        const auto rotated = static_cast<std::uint32_t>(rotate_left_32(
+            static_cast<std::uint32_t>(state.gpr[d.rt]), shift));
+        result = rotated & mask32(mb, me);
+        destination = d.ra;
+        writes_result = true;
+        record_32bit = true;
+        break;
+    }
+    case 23: { // rlwnm: rotate word by RB[0:4], then apply a wrapping mask.
+        const unsigned shift = static_cast<unsigned>(state.gpr[d.rb] & 0x1FU);
         const unsigned mb = (instruction >> 6U) & 0x1FU;
         const unsigned me = (instruction >> 1U) & 0x1FU;
         const auto rotated = static_cast<std::uint32_t>(rotate_left_32(
