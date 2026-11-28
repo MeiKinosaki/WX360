@@ -893,6 +893,26 @@ int main() {
     check(execute(s, vx_form(10, 1, 2, 902U)) == StepResult::Executed &&
           s.vr[10].lane[2] == 0U && s.vr[10].lane[3] == 0xFFFFFFFFU,
           "VMX VCMPGTSW compares signed word lanes");
+    s.vr[1].lane = {std::bit_cast<std::uint32_t>(1.0F),
+                    std::bit_cast<std::uint32_t>(2.0F),
+                    std::bit_cast<std::uint32_t>(-1.0F),
+                    std::bit_cast<std::uint32_t>(0.0F)};
+    s.vr[2].lane = {std::bit_cast<std::uint32_t>(1.0F),
+                    std::bit_cast<std::uint32_t>(1.0F),
+                    std::bit_cast<std::uint32_t>(-2.0F),
+                    std::bit_cast<std::uint32_t>(0.0F)};
+    check(execute(s, vx_form(11, 1, 2, 198U)) == StepResult::Executed &&
+          s.vr[11].lane == std::array<std::uint32_t,4>{
+              0xFFFFFFFFU, 0U, 0U, 0xFFFFFFFFU},
+          "VMX VCMPEQFP compares floating-point lanes");
+    check(execute(s, vx_form(12, 1, 2, 454U)) == StepResult::Executed &&
+          s.vr[12].lane == std::array<std::uint32_t,4>{
+              0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU},
+          "VMX VCMPGEFP compares floating-point lanes");
+    check(execute(s, vx_form(13, 1, 2, 710U)) == StepResult::Executed &&
+          s.vr[13].lane == std::array<std::uint32_t,4>{
+              0U, 0xFFFFFFFFU, 0xFFFFFFFFU, 0U},
+          "VMX VCMPGTFP compares floating-point lanes");
     s.vr[1].lane = {0x01030507U, 0x00020004U, 0x00000002U, 0xFEFCFAF8U};
     s.vr[2].lane = {0x02040608U, 0x00040006U, 0x00000004U, 0x00020406U};
     check(execute(s, vx_form(3, 1, 2, 4)) == StepResult::Executed &&
