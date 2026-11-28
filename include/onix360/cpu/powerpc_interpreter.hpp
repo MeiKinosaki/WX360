@@ -1116,6 +1116,19 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
         break;
     }
     case 31:
+        // ISEL's BC field overlaps the upper bits of the ten-bit XO field.
+        // Decode its five-bit XO separately before the ordinary X-form switch.
+        if ((d.xo & 0x1FU) == 15U) {
+            const unsigned condition_bit = (instruction >> 6U) & 0x1FU;
+            const bool condition =
+                ((state.cr >> (31U - condition_bit)) & 1U) != 0U;
+            const std::uint64_t if_true =
+                d.ra == 0U ? 0U : state.gpr[d.ra];
+            result = condition ? if_true : state.gpr[d.rb];
+            destination = d.rt;
+            writes_result = true;
+            break;
+        }
         switch (d.xo) {
         case 103: case 359: case 231: case 487: { // LVX/LVXL/STVX/STVXL.
             const bool store_vector = d.xo == 231U || d.xo == 487U;
@@ -1257,15 +1270,6 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 }
             }
             if (update) state.gpr[d.ra] = address;
-            break;
-        }
-        case 15: { // isel: select RA or RB using a CR bit (RA=0 is literal zero).
-            const unsigned condition_bit = (instruction >> 6U) & 0x1FU;
-            const bool condition = ((state.cr >> (31U - condition_bit)) & 1U) != 0U;
-            const std::uint64_t if_true = d.ra == 0U ? 0U : state.gpr[d.ra];
-            result = condition ? if_true : state.gpr[d.rb];
-            destination = d.rt;
-            writes_result = true;
             break;
         }
         case 19: // mfcr: RT = CR
