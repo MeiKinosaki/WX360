@@ -85,6 +85,7 @@ int main() {
     s.set_condition_field(2, 0x4U);
     check(execute(s, isel_cr2_lt) == StepResult::Executed && s.gpr[4] == 0x2222U,
           "ISEL chooses RB when the selected CR bit is clear");
+    s.set_condition_field(2, 0x8U); // BI=8 must be true to test RA=0 selection.
     const std::uint32_t isel_zero = (31U << 26U) | (5U << 21U) |
         (2U << 11U) | (8U << 6U) | (15U << 1U);
     check(execute(s, isel_zero) == StepResult::Executed && s.gpr[5] == 0U,
