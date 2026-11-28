@@ -1555,13 +1555,6 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             writes_result = true;
             break;
         }
-        case 26: { // cntlzw: count leading zeroes in the low 32-bit word.
-            const std::uint32_t value = static_cast<std::uint32_t>(state.gpr[d.rt]);
-            result = value == 0U ? 32U : static_cast<unsigned>(std::countl_zero(value));
-            destination = d.ra;
-            writes_result = true;
-            break;
-        }
         case 104: { // neg (OE=0 only): RT = -RA
             if ((instruction & (1U << 10U)) != 0) return StepResult::UnsupportedInstruction;
             result = std::uint64_t{0} - state.gpr[d.ra];
