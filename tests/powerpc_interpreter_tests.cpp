@@ -43,6 +43,24 @@ int main() {
     using namespace onix360::cpu;
     constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
     XenonThreadState s;
+    s.set_condition_field(1, 0xAU);
+    const std::uint32_t mcrf = (19U << 26U) | (3U << 23U) | (1U << 18U);
+    check(execute(s, mcrf) == StepResult::Executed &&
+          s.condition_field(3) == 0xAU,
+          "MCRF copies the selected condition-register field");
+    s.cr = 0;
+    s.cr |= std::uint32_t{1} << (31U - 2U);
+    s.cr |= std::uint32_t{1} << (31U - 7U);
+    const std::uint32_t crand = (19U << 26U) | (9U << 21U) |
+        (2U << 16U) | (7U << 11U) | (257U << 1U);
+    check(execute(s, crand) == StepResult::Executed &&
+          ((s.cr >> (31U - 9U)) & 1U) == 1U,
+          "CRAND combines two selected CR bits");
+    const std::uint32_t crxor = (19U << 26U) | (10U << 21U) |
+        (2U << 16U) | (8U << 11U) | (193U << 1U);
+    check(execute(s, crxor) == StepResult::Executed &&
+          ((s.cr >> (31U - 10U)) & 1U) == 1U,
+          "CRXOR writes the exclusive-or of selected CR bits");
     s.gpr[1] = 0xA5A5A5A5U;
     s.gpr[2] = 0x12345678U;
     const std::uint32_t rlwimi = (20U << 26U) | (2U << 21U) | (1U << 16U) |
