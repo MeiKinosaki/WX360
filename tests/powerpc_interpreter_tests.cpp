@@ -597,6 +597,33 @@ int main() {
     check(s.gpr[10] == UINT64_MAX - 5U && (s.xer & xer_ca) != 0,
           "SUBFME computes complemented operand plus carry-in minus one");
 
+    // SUBFE and ADDZE OE update signed overflow and sticky summary overflow.
+    s.gpr[3] = 0x8000000000000000ULL;
+    s.gpr[4] = 1;
+    s.xer = 0;
+    check(execute(s, x_form(11, 3, 4, 136) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[11] == 0x8000000000000000ULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "SUBFE OE detects signed overflow from complemented RA plus RB");
+    s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
+    s.xer = 0;
+    check(execute(s, x_form(12, 3, 0, 202) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[12] == 0x8000000000000000ULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "ADDZE OE detects signed maximum plus carry overflow");
+    s.gpr[3] = 0x7FFFFFFFFFFFFFFFULL;
+    s.xer = xer_so_test;
+    check(execute(s, x_form(12, 3, 0, 202) | (1U << 10U)) ==
+              StepResult::Executed &&
+          s.gpr[12] == 0x7FFFFFFFFFFFFFFFULL &&
+          (s.xer & xer_ov_test) == 0 &&
+          (s.xer & xer_so_test) != 0,
+          "ADDZE OE clears OV and preserves sticky SO without carry-in");
+
     // OE forms for ADDME/SUBFME update OV and sticky SO at signed boundaries.
     s.gpr[3] = 0x8000000000000000ULL;
     s.xer = 0;
