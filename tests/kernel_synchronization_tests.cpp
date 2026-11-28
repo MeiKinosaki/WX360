@@ -52,5 +52,17 @@ int main() {
           "rejects semaphore release beyond maximum count");
     check(sync.wait_event(999, 1) == WaitResult::InvalidObject,
           "rejects unknown synchronization object");
+    check(sync.event_waiter_count(*manual) == 0U &&
+          sync.event_signaled(*manual) == true,
+          "reports manual event signal and waiter state");
+    check(sync.semaphore_waiter_count(*semaphore) == 0U,
+          "reports semaphore waiter count after wakeup");
+    check(sync.close_event(*manual) && !sync.has_event(*manual) &&
+          !sync.close_event(*manual),
+          "closes event objects exactly once");
+    check(sync.close_semaphore(*semaphore) &&
+          !sync.semaphore_count(*semaphore) &&
+          !sync.close_semaphore(*semaphore),
+          "closes semaphore objects exactly once");
     return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
