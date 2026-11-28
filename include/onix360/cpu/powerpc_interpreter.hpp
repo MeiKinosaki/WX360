@@ -816,6 +816,35 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 out.lane[lane] = std::bit_cast<std::uint32_t>(
                     xo == 10U ? x + y : x - y);
             }
+        } else if (xo == 524U || xo == 588U || xo == 652U) {
+            // vspltb / vsplth / vspltw select one element from VA and
+            // broadcast it across the destination vector.
+            const unsigned width = xo == 524U ? 8U : (xo == 588U ? 16U : 32U);
+            const unsigned element_count = 128U / width;
+            const unsigned index = d.rb & (element_count - 1U);
+            std::array<std::uint8_t,16> source{};
+            for (unsigned lane = 0; lane < 4; ++lane) {
+                const auto word = a.lane[lane];
+                for (unsigned byte = 0; byte < 4; ++byte)
+                    source[lane * 4U + byte] =
+                        static_cast<std::uint8_t>(word >> (24U - byte * 8U));
+            }
+            std::uint32_t packed = 0;
+            if (width == 8U) {
+                packed = static_cast<std::uint32_t>(source[index]) * 0x01010101U;
+            } else if (width == 16U) {
+                const unsigned offset = index * 2U;
+                const auto value = (static_cast<std::uint32_t>(source[offset]) << 8U) |
+                                   source[offset + 1U];
+                packed = (value << 16U) | value;
+            } else {
+                const unsigned offset = index * 4U;
+                packed = (static_cast<std::uint32_t>(source[offset]) << 24U) |
+                         (static_cast<std::uint32_t>(source[offset + 1U]) << 16U) |
+                         (static_cast<std::uint32_t>(source[offset + 2U]) << 8U) |
+                         source[offset + 3U];
+            }
+            out.lane.fill(packed);
         } else if (xo == 780U || xo == 844U || xo == 908U) {
             // vspltisb / vspltish / vspltisw: sign-extend SIMM5 and
             // broadcast it to every byte, halfword, or word element.
