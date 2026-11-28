@@ -93,6 +93,7 @@ int main() {
     const std::uint32_t fdiv = (63U << 26U) | (5U << 21U) | (2U << 16U) | (1U << 11U) | (18U << 1U);
     check(execute(s, fdiv) == StepResult::Executed, "FDIV double executes");
     check(std::bit_cast<double>(s.fpr[5]) == 1.5, "FDIV computes FRA divided by FRB");
+    s.fpr[1] = std::bit_cast<std::uint64_t>(1.5);
     s.fpr[6] = std::bit_cast<std::uint64_t>(4.0);
     const std::uint32_t fmul = (63U << 26U) | (7U << 21U) | (1U << 16U) | (6U << 6U) | (25U << 1U);
     check(execute(s, fmul) == StepResult::Executed, "FMUL double executes");
