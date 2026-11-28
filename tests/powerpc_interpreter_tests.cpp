@@ -914,6 +914,19 @@ int main() {
           s.vr[13].lane == std::array<std::uint32_t,4>{
               0U, 0xFFFFFFFFU, 0xFFFFFFFFU, 0U},
           "VMX VCMPGTFP compares floating-point lanes");
+    s.vr[1].lane = {0x10203040U, 0x50607080U, 0x90A0B0C0U, 0xD0E0F001U};
+    check(execute(s, vx_form(17, 1U, 3U, 524U)) == StepResult::Executed &&
+          s.vr[17].lane == std::array<std::uint32_t,4>{
+              0x40404040U, 0x40404040U, 0x40404040U, 0x40404040U},
+          "VMX VSPLTB broadcasts the selected byte");
+    check(execute(s, vx_form(18, 1U, 5U, 588U)) == StepResult::Executed &&
+          s.vr[18].lane == std::array<std::uint32_t,4>{
+              0xA0B0A0B0U, 0xA0B0A0B0U, 0xA0B0A0B0U, 0xA0B0A0B0U},
+          "VMX VSPLTH broadcasts the selected halfword");
+    check(execute(s, vx_form(19, 1U, 2U, 652U)) == StepResult::Executed &&
+          s.vr[19].lane == std::array<std::uint32_t,4>{
+              0x90A0B0C0U, 0x90A0B0C0U, 0x90A0B0C0U, 0x90A0B0C0U},
+          "VMX VSPLTW broadcasts the selected word");
     check(execute(s, vx_form(14, 0x1EU, 0U, 780U)) == StepResult::Executed &&
           s.vr[14].lane == std::array<std::uint32_t,4>{
               0xFEFEFEFEU, 0xFEFEFEFEU, 0xFEFEFEFEU, 0xFEFEFEFEU},
