@@ -29,6 +29,13 @@
 - O pipeline XEX, imports/exports, segurança/assinatura, GPU Xenos, XMA, kernel/XAM e compatibilidade ainda têm lacunas substanciais.
 - Não declarar execução de XEX real, boot de jogos, build ou testes aprovados sem evidência de execução correspondente. Esta etapa não executa XEX nem jogos reais.
 
+## CPU Xenon: incrementos recentes em validação
+
+- O interpretador recebeu operações PowerPC de controle do FPSCR: `MCRFS`, `MTFSB0`, `MTFSB1` e `MTFSFI`.
+- O subconjunto VMX recebeu comparações vetoriais por igualdade e maior que, para elementos de 8, 16 e 32 bits, com variantes assinadas e não assinadas.
+- Foram adicionados testes sintéticos para essas instruções e corrigidos vetores de regressão de FPU/exceções.
+- Esses incrementos estão submetidos à CI. Até a conclusão da execução, não são declarados como validados; a versão permanece v0.7b.
+
 ## Build e testes
 
 Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/testes; a existência de alvos no CMake não significa que tenham sido executados ou aprovados.
