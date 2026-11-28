@@ -2,12 +2,12 @@
 
 **Windows Xbox 360 Emulator** — emulador experimental do Xbox 360 para Windows x64, com foco em computadores modestos.
 
-> **Versão em desenvolvimento:** v1.0.1-preview (prévia experimental; ainda não é uma versão estável). O projeto ainda não executa jogos comerciais.
+> **Versão em desenvolvimento:** v1.0.2-preview (prévia experimental; ainda não é uma versão estável). O projeto ainda não executa jogos comerciais.
 >
 > **Marcos v0.7b validados em 24/11/2026:** testes de branches PowerPC `BCLR`/`BCCTR`, incluindo variantes com link, condições CR, destinos LR/CTR e semântica de CTR/LR passaram na CI #549 e #550. Isso valida apenas os testes do interpretador; não comprova boot de homebrew ou XEX comercial, assinatura RSA ou compatibilidade com jogos.
 
 
-## Marco 1.0.1 Preview
+## Marco 1.0.2 Preview
 
 - Identificador de versão do projeto atualizado para `1.0.0` no CMake e `1.0.1-preview` na documentação.
 - Este marco é uma prévia de desenvolvimento, não uma declaração de estabilidade ou compatibilidade com jogos.
@@ -75,6 +75,12 @@ Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/
 - `POPCNTB` conta bits por byte; `POPCNTW` e `POPCNTD` contam bits em word e doubleword.
 - `ISEL` seleciona um registrador ou zero conforme um bit do CR.
 - Testes sintéticos foram adicionados para os resultados, seleção de CR e atualização do XER. A CI desta revisão ainda precisa executar; não declarar esses testes aprovados antes do resultado.
+
+## Marco 1.0.2 Preview — CNTLZW
+
+- O interpretador PowerPC implementa `CNTLZW`, contando zeros à esquerda nos 32 bits inferiores do registrador de origem.
+- Testes sintéticos cobrem um valor com três zeros à esquerda e o caso de word igual a zero (resultado 32).
+- A implementação e os testes foram enviados ao repositório; a aprovação da CI desta revisão ainda precisa ser confirmada.
 
 ## Cobertura adicional do registrador de condição PowerPC
 
