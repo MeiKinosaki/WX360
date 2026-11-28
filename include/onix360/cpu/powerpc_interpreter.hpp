@@ -816,6 +816,15 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 out.lane[lane] = std::bit_cast<std::uint32_t>(
                     xo == 10U ? x + y : x - y);
             }
+        } else if (xo == 198U || xo == 454U || xo == 710U) {
+            // vcmpeqfp / vcmpgefp / vcmpgtfp; unordered NaN comparisons are false.
+            for (unsigned lane = 0; lane < 4; ++lane) {
+                const float lhs = std::bit_cast<float>(a.lane[lane]);
+                const float rhs = std::bit_cast<float>(b.lane[lane]);
+                const bool match = xo == 198U ? lhs == rhs :
+                    (xo == 454U ? lhs >= rhs : lhs > rhs);
+                out.lane[lane] = match ? 0xFFFFFFFFU : 0U;
+            }
         } else if (xo == 6U || xo == 70U || xo == 134U ||
                    xo == 518U || xo == 582U || xo == 646U ||
                    xo == 774U || xo == 838U || xo == 902U) {
