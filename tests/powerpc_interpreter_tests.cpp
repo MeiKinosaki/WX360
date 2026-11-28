@@ -558,6 +558,28 @@ int main() {
     check(s.gpr[8] == UINT64_MAX - 5U && (s.xer & xer_ca) == 0,
           "SUBFZE computes complement without carry-in");
 
+    // SUBFZE OE updates OV and sticky SO without changing its result.
+    constexpr std::uint64_t xer_ov_test = std::uint64_t{1} << 30U;
+    constexpr std::uint64_t xer_so_test = std::uint64_t{1} << 31U;
+    s.gpr[3] = 0x8000000000000000ULL;
+    s.xer = xer_ca;
+    check(execute(s, x_form(8, 3, 0, 200) | (1U << 10U)) ==
+              StepResult::Executed,
+          "SUBFZE with OE executes");
+    check(s.gpr[8] == 0x8000000000000000ULL &&
+          (s.xer & (xer_ov_test | xer_so_test)) ==
+              (xer_ov_test | xer_so_test),
+          "SUBFZE OE sets OV and sticky SO on signed overflow");
+    s.gpr[3] = 5;
+    s.xer = xer_ca | xer_ov_test | xer_so_test;
+    check(execute(s, x_form(8, 3, 0, 200) | (1U << 10U)) ==
+              StepResult::Executed,
+          "SUBFZE OE executes without overflow");
+    check(s.gpr[8] == UINT64_MAX - 4U &&
+          (s.xer & xer_ov_test) == 0 &&
+          (s.xer & xer_so_test) != 0,
+          "SUBFZE OE clears OV but preserves sticky SO when no overflow");
+
     // ADDME and SUBFME compute operand + carry-in - 1.
     s.gpr[3] = 0;
     s.xer |= xer_ca;
