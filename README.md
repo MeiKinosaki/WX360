@@ -67,3 +67,11 @@
 ## Build e testes
 
 Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/testes; a existência de alvos no CMake não significa que tenham sido executados ou aprovados.
+
+## CPU PowerPC: instruções adicionadas nesta rodada
+
+- `MCRXR` transfere SO/OV/CA do XER para um campo CR e limpa esses três bits no XER.
+- `EXTSW` estende o sinal do word de 32 bits para 64 bits.
+- `POPCNTB` conta bits por byte; `POPCNTW` e `POPCNTD` contam bits em word e doubleword.
+- `ISEL` seleciona um registrador ou zero conforme um bit do CR.
+- Testes sintéticos foram adicionados para os resultados, seleção de CR e atualização do XER. A CI desta revisão ainda precisa executar; não declarar esses testes aprovados antes do resultado.
