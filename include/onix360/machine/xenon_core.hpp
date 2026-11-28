@@ -344,6 +344,9 @@ struct XenonCore {
         case cpu::StepResult::AlignmentFault:
             state.raise_exception(0x600U, fault_address);
             return RunResult::ExceptionTaken;
+        case cpu::StepResult::ProgramException:
+            state.raise_exception(0x700U);
+            return RunResult::ExceptionTaken;
         }
         return RunResult::UnsupportedInstruction;
     }
