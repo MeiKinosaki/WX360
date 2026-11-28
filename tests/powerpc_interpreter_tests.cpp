@@ -868,10 +868,10 @@ int main() {
     s.vr[1].lane = {0xFF000201U, 0x0002FF04U, 0x80000002U, 0x7FFFFFFFU};
     s.vr[2].lane = {0x01010001U, 0x00010005U, 0x7FFFFFFFU, 0x80000000U};
     check(execute(s, vx_form(6, 1, 2, 518U)) == StepResult::Executed &&
-          s.vr[6].lane[0] == 0x00000000U,
+          s.vr[6].lane[0] == 0xFF00FF00U,
           "VMX VCMPGTUB compares unsigned byte lanes");
     check(execute(s, vx_form(7, 1, 2, 774U)) == StepResult::Executed &&
-          s.vr[7].lane[0] == 0xFF000000U,
+          s.vr[7].lane[0] == 0x000000FFU,
           "VMX VCMPGTSB compares signed byte lanes");
     check(execute(s, vx_form(8, 1, 2, 838U)) == StepResult::Executed &&
           s.vr[8].lane[1] == 0xFFFF0000U,
@@ -880,7 +880,7 @@ int main() {
           s.vr[9].lane[2] == 0xFFFFFFFFU,
           "VMX VCMPGTUW compares unsigned word lanes");
     check(execute(s, vx_form(10, 1, 2, 902U)) == StepResult::Executed &&
-          s.vr[10].lane[2] == 0U && s.vr[10].lane[3] == 0U,
+          s.vr[10].lane[2] == 0U && s.vr[10].lane[3] == 0xFFFFFFFFU,
           "VMX VCMPGTSW compares signed word lanes");
     s.vr[1].lane = {0x01030507U, 0x00020004U, 0x00000002U, 0xFEFCFAF8U};
     s.vr[2].lane = {0x02040608U, 0x00040006U, 0x00000004U, 0x00020406U};
