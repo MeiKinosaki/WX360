@@ -920,7 +920,7 @@ int main() {
           "VMX VSPLTISB broadcasts a signed byte immediate");
     check(execute(s, vx_form(15, 0x11U, 0U, 844U)) == StepResult::Executed &&
           s.vr[15].lane == std::array<std::uint32_t,4>{
-              0xFFFF0001U, 0xFFFF0001U, 0xFFFF0001U, 0xFFFF0001U},
+              0xFFF1FFF1U, 0xFFF1FFF1U, 0xFFF1FFF1U, 0xFFF1FFF1U},
           "VMX VSPLTISH broadcasts a signed halfword immediate");
     check(execute(s, vx_form(16, 0x1FU, 0U, 908U)) == StepResult::Executed &&
           s.vr[16].lane == std::array<std::uint32_t,4>{
