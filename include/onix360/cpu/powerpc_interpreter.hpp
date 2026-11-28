@@ -1451,6 +1451,33 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             destination = d.ra;
             writes_result = true;
             break;
+        case 986: // extsw
+            result = static_cast<std::uint64_t>(
+                static_cast<std::int64_t>(static_cast<std::int32_t>(state.gpr[d.rt])));
+            destination = d.ra;
+            writes_result = true;
+            break;
+        case 122: { // popcntb: count set bits independently in each byte.
+            const auto value = state.gpr[d.rt];
+            result = 0;
+            for (unsigned byte = 0; byte < 8U; ++byte) {
+                const auto lane = static_cast<std::uint8_t>(value >> (byte * 8U));
+                result |= static_cast<std::uint64_t>(std::popcount(lane)) << (byte * 8U);
+            }
+            destination = d.ra;
+            writes_result = true;
+            break;
+        }
+        case 378: // popcntw: count set bits in the low 32-bit word.
+            result = std::popcount(static_cast<std::uint32_t>(state.gpr[d.rt]));
+            destination = d.ra;
+            writes_result = true;
+            break;
+        case 506: // popcntd: count set bits in the full doubleword.
+            result = std::popcount(state.gpr[d.rt]);
+            destination = d.ra;
+            writes_result = true;
+            break;
         case 58: { // cntlzd
             const std::uint64_t value = state.gpr[d.rt];
             unsigned count = 0;
