@@ -883,8 +883,7 @@ int main() {
           s.vr[6].lane[0] == 0xFF00FF00U,
           "VMX VCMPGTUB compares unsigned byte lanes");
     check(execute(s, vx_form(7, 1, 2, 774U)) == StepResult::Executed &&
-          (std::cerr << "VCMPGTSB=" << std::hex << s.vr[7].lane[0] << std::dec << "\\n", true) &&
-          s.vr[7].lane[0] == 0x000000FFU,
+          s.vr[7].lane[0] == 0x0000FF00U,
           "VMX VCMPGTSB compares signed byte lanes");
     check(execute(s, vx_form(8, 1, 2, 838U)) == StepResult::Executed &&
           s.vr[8].lane[1] == 0xFFFF0000U,
