@@ -919,7 +919,7 @@ int main() {
           s.vr[17].lane == std::array<std::uint32_t,4>{
               0x40404040U, 0x40404040U, 0x40404040U, 0x40404040U},
           "VMX VSPLTB broadcasts the selected byte");
-    check(execute(s, vx_form(18, 1U, 5U, 588U)) == StepResult::Executed &&
+    check(execute(s, vx_form(18, 1U, 4U, 588U)) == StepResult::Executed &&
           s.vr[18].lane == std::array<std::uint32_t,4>{
               0xA0B0A0B0U, 0xA0B0A0B0U, 0xA0B0A0B0U, 0xA0B0A0B0U},
           "VMX VSPLTH broadcasts the selected halfword");
