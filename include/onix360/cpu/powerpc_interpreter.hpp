@@ -182,7 +182,7 @@ struct AddressSpaceMemoryBus {
             },
             +[](void* c, std::uint64_t a, std::span<std::uint8_t> out) noexcept {
                 auto& b = *static_cast<AddressSpaceMemoryBus*>(c);
-                if (b.thread_state &&
+                if (!b.thread_state ||
                     !segment_allows_instruction_fetch(*b.thread_state, a))
                     return false;
                 const auto p = b.translate(a, out.size(), memory::Access::Execute);
