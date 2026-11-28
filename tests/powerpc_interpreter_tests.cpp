@@ -81,6 +81,8 @@ int main() {
     check(execute(s, fsel) == StepResult::Executed &&
           std::bit_cast<double>(s.fpr[9]) == -7.0,
           "FSEL selects FRC when FRA is negative");
+    s.fpr[1] = std::bit_cast<std::uint64_t>(1.5);
+    s.fpr[2] = std::bit_cast<std::uint64_t>(2.25);
     s.fpscr = 0xA0000000U;
     check(execute(s, fadd | 1U) == StepResult::Executed, "FADD. executes with Rc set");
     check(s.condition_field(1) == 0xA,
