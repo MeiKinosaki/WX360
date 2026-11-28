@@ -17,6 +17,7 @@
 #include "onix360/state/state_slots.hpp"
 #include "onix360/ui/slot_visual_state.hpp"
 #include "onix360/ui/clock_display.hpp"
+#include "onix360/version.hpp"
 #include "onix360/xex/xex_image_loader.hpp"
 
 namespace onix360::ui {
@@ -38,7 +39,10 @@ public:
   wc.hbrBackground = nullptr;
   RegisterClassW(&wc);
   instance_ = instance;
-  HWND window = CreateWindowExW(0, wc.lpszClassName, L"Onix360 | Aurora-style Dashboard",
+  std::wstring window_title = L"Onix360 ";
+  window_title += version::display;
+  window_title += L" | Aurora-style Dashboard";
+  HWND window = CreateWindowExW(0, wc.lpszClassName, window_title.c_str(),
       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1180, 760,
       nullptr, nullptr, instance, this);
   if (!window) return 1;
