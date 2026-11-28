@@ -90,8 +90,7 @@ Configure com CMake 3.20+ e execute o conjunto CTest. A CI deve validar o build/
 - Operações lógicas CR: `CRAND`, `CRANDC`, `CREQV`, `CRNAND`, `CRNOR`, `CROR`, `CRORC` e `CRXOR`.
 - Testes sintéticos foram adicionados; a execução na CI desta revisão ainda precisa ser confirmada.
 
-## Versão 1.0.1 Preview — sequência incremental
+## Histórico técnico de marcos anteriores
 
-- Atualização sequencial de 1.0.0-preview para 1.0.1-preview.
-- Inclui os incrementos recentes do interpretador PowerPC: ISEL, MCRXR, EXTSW, POPCNTB/W/D, RLWIMI, RLWNM, MCRF e operações lógicas do CR.
-- A numeração identifica um marco de desenvolvimento, não uma versão estável. A validação de CI e as limitações descritas neste README continuam obrigatórias.
+- Os incrementos históricos do interpretador PowerPC incluem ISEL, MCRXR, EXTSW, POPCNTB/W/D, RLWIMI, RLWNM, MCRF e operações lógicas do CR.
+- A versão corrente documentada neste repositório é v1.0.3b; os registros históricos não substituem a validação da revisão atual.
