@@ -26,6 +26,23 @@ int main() {
           "core fetches and executes instruction from guest RAM");
     check(core.state.gpr[3] == 42 && core.state.pc == 0x104,
           "core updates GPR and PC after instruction execution");
+    memory::PhysicalMemory privilege_ram(0x4000);
+    const std::uint32_t mfmsr_r3 = (31U << 26U) | (3U << 21U) | (83U << 1U);
+    const std::array<std::uint8_t,4> mfmsr_bytes{
+        static_cast<std::uint8_t>(mfmsr_r3 >> 24U),
+        static_cast<std::uint8_t>(mfmsr_r3 >> 16U),
+        static_cast<std::uint8_t>(mfmsr_r3 >> 8U),
+        static_cast<std::uint8_t>(mfmsr_r3)};
+    check(privilege_ram.write(0x100U, mfmsr_bytes) == memory::MemoryResult::Ok,
+          "place privileged MFMSR instruction");
+    machine::XenonCore privilege_core;
+    privilege_core.state.reset(0x100U);
+    privilege_core.state.msr = (std::uint64_t{1} << 14U);
+    check(privilege_core.step(privilege_ram) == machine::RunResult::ExceptionTaken &&
+          privilege_core.state.pc == 0x700U &&
+          privilege_core.state.srr0 == 0x100U &&
+          privilege_core.state.exception_vector == 0x700U,
+          "privileged MFMSR delivers a program exception through vector 0x700");
     const std::array<std::uint8_t,4> alias_bytes{0x11,0x22,0x33,0x44};
     std::array<std::uint8_t,4> alias_readback{};
     check(core.write_guest(ram, 0xA0000200U, alias_bytes) == memory::MemoryResult::Ok &&
