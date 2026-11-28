@@ -853,6 +853,18 @@ int main() {
     check(execute(s, vx_form(3, 1, 2, 130)) == StepResult::Executed &&
           s.vr[3].lane[1] == 0x7FFFFFFFU &&
           s.vr[3].lane[2] == 0U, "VMX VMINUW compares 32-bit lanes as unsigned");
+    s.vr[1].lane = {0x01020304U, 0x00020004U, 0x11223344U, 0xAABBCCDDU};
+    s.vr[2].lane = {0x01090304U, 0x00020005U, 0x11223344U, 0xAABBCC00U};
+    check(execute(s, vx_form(3, 1, 2, 6U)) == StepResult::Executed &&
+          s.vr[3].lane[0] == 0xFF00FFFFU,
+          "VMX VCMPEQUB returns byte masks for equal elements");
+    check(execute(s, vx_form(4, 1, 2, 70U)) == StepResult::Executed &&
+          s.vr[4].lane[1] == 0xFFFFFFFFU,
+          "VMX VCMPEQUH returns halfword masks for equal elements");
+    check(execute(s, vx_form(5, 1, 2, 134U)) == StepResult::Executed &&
+          s.vr[5].lane[2] == 0xFFFFFFFFU &&
+          s.vr[5].lane[3] == 0U,
+          "VMX VCMPEQUW returns word masks for equal elements");
     s.vr[1].lane = {0x01030507U, 0x00020004U, 0x00000002U, 0xFEFCFAF8U};
     s.vr[2].lane = {0x02040608U, 0x00040006U, 0x00000004U, 0x00020406U};
     check(execute(s, vx_form(3, 1, 2, 4)) == StepResult::Executed &&
