@@ -43,6 +43,20 @@ int main() {
     using namespace onix360::cpu;
     constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
     XenonThreadState s;
+    s.gpr[1] = 0x80FF010203040506ULL;
+    check(execute(s, x_form(1, 2, 0, 122)) == StepResult::Executed &&
+          s.gpr[2] == 0x0108010101020102ULL,
+          "POPCNTB counts bits independently in each byte");
+    check(execute(s, x_form(1, 3, 0, 378)) == StepResult::Executed &&
+          s.gpr[3] == 8U,
+          "POPCNTW counts bits in the low word");
+    check(execute(s, x_form(1, 4, 0, 506)) == StepResult::Executed &&
+          s.gpr[4] == 13U,
+          "POPCNTD counts bits across the full doubleword");
+    s.gpr[1] = 0x0000000080000001ULL;
+    check(execute(s, x_form(1, 5, 0, 986)) == StepResult::Executed &&
+          s.gpr[5] == 0xFFFFFFFF80000001ULL,
+          "EXTSW sign-extends the low word to 64 bits");
     s.xer = (std::uint64_t{1} << 31U) |
             (std::uint64_t{1} << 30U) |
             (std::uint64_t{1} << 29U) | 0x1234U;
