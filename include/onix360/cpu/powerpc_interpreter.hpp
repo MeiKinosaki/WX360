@@ -873,7 +873,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 all_false = all_false && !match;
                 out.lane[lane] = match ? 0xFFFFFFFFU : 0U;
             }
-            if (d.rc)
+            if ((instruction & 1U) != 0U)
                 state.set_condition_field(6, all_true ? 0x8U :
                     (all_false ? 0x2U : 0x0U));
         } else if (xo == 6U || xo == 70U || xo == 134U ||
@@ -916,7 +916,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                 }
                 out.lane[word] = packed;
             }
-            if (d.rc)
+            if ((instruction & 1U) != 0U)
                 state.set_condition_field(6, all_true ? 0x8U :
                     (all_false ? 0x2U : 0x0U));
         } else if (xo == 4U || xo == 68U || xo == 132U ||
