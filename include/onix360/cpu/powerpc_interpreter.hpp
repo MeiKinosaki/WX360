@@ -642,6 +642,18 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
                     static_cast<std::uint8_t>((state.fpscr >> 28U) & 0xFU));
             break;
         }
+        if (d.xo == 134U) { // mtfsfi: write an immediate into one FPSCR field.
+            const unsigned bf = (instruction >> 23U) & 7U;
+            const unsigned immediate = (instruction >> 12U) & 0xFU;
+            const unsigned shift = 28U - bf * 4U;
+            const std::uint32_t mask = 0xFU << shift;
+            state.fpscr = (state.fpscr & ~mask) |
+                (static_cast<std::uint32_t>(immediate) << shift);
+            if ((instruction & 1U) != 0)
+                state.set_condition_field(1,
+                    static_cast<std::uint8_t>((state.fpscr >> 28U) & 0xFU));
+            break;
+        }
         if (d.xo == 64U) { // mcrfs: copy an FPSCR field into a CR field.
             const unsigned bf = (instruction >> 23U) & 7U;
             const unsigned bfa = (instruction >> 18U) & 7U;
