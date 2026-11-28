@@ -858,7 +858,7 @@ int main() {
         std::cerr << "MTCRF actual CR=" << std::hex << s.cr
                   << " fields=" << static_cast<unsigned>(s.condition_field(0)) << ","
                   << static_cast<unsigned>(s.condition_field(1)) << ","
-                  << static_cast<unsigned>(s.condition_field(2)) << std::dec << '\\n';
+                  << static_cast<unsigned>(s.condition_field(2)) << std::dec << '\n';
         ++failures;
     }
     const auto unsupported_spr_pc = s.pc;
