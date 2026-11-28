@@ -1592,8 +1592,7 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             writes_result = true;
             break;
         }
-        case 136: { // subfe (OE=0 only): ~RA + RB + XER[CA]
-            if ((instruction & (1U << 10U)) != 0) return StepResult::UnsupportedInstruction;
+        case 136: case 648: { // subfe: ~RA + RB + XER[CA], optional OE.
             const std::uint64_t lhs = ~state.gpr[d.ra];
             const std::uint64_t rhs = state.gpr[d.rb];
             const std::uint64_t carry_in = (state.xer >> 29U) & 1U;
@@ -1602,19 +1601,34 @@ inline void update_cr0(XenonThreadState& state, std::uint64_t value,
             result = partial + carry_in;
             const bool carry2 = result < partial;
             constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
+            constexpr std::uint64_t xer_ov = std::uint64_t{1} << 30U;
+            constexpr std::uint64_t xer_so = std::uint64_t{1} << 31U;
             state.xer = (carry1 || carry2) ? (state.xer | xer_ca) : (state.xer & ~xer_ca);
+            if ((instruction & (1U << 10U)) != 0) {
+                const bool overflow =
+                    ((~(lhs ^ rhs) & (lhs ^ result)) >> 63U) != 0;
+                state.xer = overflow ? (state.xer | xer_ov | xer_so)
+                                     : (state.xer & ~xer_ov);
+            }
             destination = d.rt;
             writes_result = true;
             break;
         }
-        case 202: { // addze (OE=0 only): RT = RA + XER[CA]
-            if ((instruction & (1U << 10U)) != 0) return StepResult::UnsupportedInstruction;
+        case 202: case 714: { // addze: RT = RA + XER[CA], optional OE.
             const std::uint64_t lhs = state.gpr[d.ra];
             const std::uint64_t carry_in = (state.xer >> 29U) & 1U;
             result = lhs + carry_in;
             constexpr std::uint64_t xer_ca = std::uint64_t{1} << 29U;
+            constexpr std::uint64_t xer_ov = std::uint64_t{1} << 30U;
+            constexpr std::uint64_t xer_so = std::uint64_t{1} << 31U;
             state.xer = (carry_in != 0 && result == 0)
                 ? (state.xer | xer_ca) : (state.xer & ~xer_ca);
+            if ((instruction & (1U << 10U)) != 0) {
+                const bool overflow = carry_in != 0 &&
+                    lhs == 0x7FFFFFFFFFFFFFFFULL;
+                state.xer = overflow ? (state.xer | xer_ov | xer_so)
+                                     : (state.xer & ~xer_ov);
+            }
             destination = d.rt;
             writes_result = true;
             break;
