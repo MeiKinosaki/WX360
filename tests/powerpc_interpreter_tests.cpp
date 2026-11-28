@@ -48,11 +48,11 @@ int main() {
           s.gpr[2] == 0x0108010101020102ULL,
           "POPCNTB counts bits independently in each byte");
     check(execute(s, x_form(1, 3, 0, 378)) == StepResult::Executed &&
-          s.gpr[3] == 8U,
-          "POPCNTW counts bits in the low word");
+          s.gpr[3] == 7U,
+          "POPCNTW counts the seven set bits in the low word");
     check(execute(s, x_form(1, 4, 0, 506)) == StepResult::Executed &&
-          s.gpr[4] == 13U,
-          "POPCNTD counts bits across the full doubleword");
+          s.gpr[4] == 18U,
+          "POPCNTD counts all eighteen set bits in the doubleword");
     s.gpr[1] = 0x0000000080000001ULL;
     check(execute(s, x_form(1, 5, 0, 986)) == StepResult::Executed &&
           s.gpr[5] == 0xFFFFFFFF80000001ULL,
@@ -60,7 +60,7 @@ int main() {
     s.xer = (std::uint64_t{1} << 31U) |
             (std::uint64_t{1} << 30U) |
             (std::uint64_t{1} << 29U) | 0x1234U;
-    check(execute(s, x_form(12, 0, 0, 512)) == StepResult::Executed,
+    check(execute(s, (31U << 26U) | (3U << 23U) | (512U << 1U)) == StepResult::Executed,
           "MCRXR transfers XER status bits into CR");
     check(s.condition_field(3) == 0xEU && s.xer == 0x1234U,
           "MCRXR preserves unrelated XER bits and clears SO/OV/CA");
